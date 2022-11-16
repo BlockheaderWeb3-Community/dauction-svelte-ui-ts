@@ -40,10 +40,12 @@
 		if (!$currentAuction) {
 			goto('/explore');
 		}
-		if (datetoUnix(new Date()) >= $currentAuction.endTime) {
-			goto('/explore');
-		}
+		// if (datetoUnix(new Date()) >= $currentAuction.endTime) {
+		// 	goto('/explore');
+		// }
 	});
+
+	const revealBid = async (auction: any) => {};
 
 	const createBid = async ({
 		nftAddress,
@@ -58,17 +60,15 @@
 	}) => {
 		console.log(nftAddress, tokenId, bidCommitment, bidToken);
 
-		closeModal();
-		return;
-
 		try {
-			const newAuction = await $contracts.dauctionContract.methods
-				.createAuction(nftAddress, tokenId, bidCommitment, bidToken)
+			const newBid = await $contracts.dauctionContract.methods
+				.createBid(nftAddress, tokenId, bidCommitment, bidToken)
 				.send({ from: $selectedAccount });
-			console.log('new Auction _______', newAuction);
-			// alert(`Take Note Of Your hashCommitment`);
+			console.log('new Bid _______', newBid);
+
+			alert(`Take Note Of Your hashCommitment`);
 			closeModal();
-			alert(`Auction Created`);
+			alert(`Bid Placed`);
 		} catch (error: any) {
 			console.log(error);
 			const msg = error.message;
@@ -87,6 +87,12 @@
 				alert(`${k} is required`);
 				return;
 			}
+		}
+
+		if ($selectedAccount?.toLowerCase() === $currentAuction.owner.toLowerCase()) {
+			alert('Auctioneer cannot place bid');
+			closeModal();
+			return;
 		}
 		if (formState.bidPrice <= Number(fromWei($currentAuction.minBidPrice))) {
 			alert('Bid cannot be less than base bid');
@@ -107,40 +113,53 @@
 
 <div class="create-bid">
 	<h1 class="title">Create Bid</h1>
+	{#if $currentAuction.owner.toLowerCase() === $selectedAccount?.toLowerCase()}
+		<h1>You Cant Bid on Your Own Auction</h1>
+	{:else if !$currentAuction.bidders
+		.join('')
+		.toLowerCase()
+		.includes($selectedAccount?.toLowerCase())}
+		<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
+			<TextInput
+				label="NFT Contract Address"
+				name="nftContractAddress"
+				required={true}
+				bind:value={formState.nftContractAddress}
+			/>
+			<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
+			<NumberInput
+				label="Bid Price ($)"
+				name="baseBid"
+				required={true}
+				bind:value={formState.bidPrice}
+				info={`Base bid - $${$currentAuction && fromWei($currentAuction.minBidPrice)}`}
+			/>
+			<!-- <span></span> -->
+			<CurrencySelector
+				data={CURRENCIES}
+				label="Choose Currency"
+				name="currencyAddress"
+				required={true}
+				bind:value={formState.currencyAddress}
+			/>
 
-	<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
-		<TextInput
-			label="NFT Contract Address"
-			name="nftContractAddress"
-			required={true}
-			bind:value={formState.nftContractAddress}
-		/>
-		<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
-		<NumberInput
-			label="Bid Price ($)"
-			name="baseBid"
-			required={true}
-			bind:value={formState.bidPrice}
-			info={`Base bid - $${$currentAuction && fromWei($currentAuction.minBidPrice)}`}
-		/>
-		<!-- <span></span> -->
-		<CurrencySelector
-			data={CURRENCIES}
-			label="Choose Currency"
-			name="currencyAddress"
-			required={true}
-			bind:value={formState.currencyAddress}
-		/>
-
-		<div class="cta">
-			<button type="submit" class="btn-primary submit">
-				<span>Place Bid</span>
+			<div class="cta">
+				<button type="submit" class="btn-primary submit">
+					<span>Place Bid</span>
+				</button>
+				<button type="button" class="btn-outline-primary" on:click={() => goto('/explore')}>
+					<span>Go Back</span>
+				</button>
+			</div>
+		</form>
+	{:else}
+		<h1>You Already Bidded</h1>
+		{#if datetoUnix(new Date()) >= $currentAuction.endTime}
+			<button class="btn-primary auction-btn-place" on:click={() => revealBid($currentAuction)}>
+				<span>Reveal Bid</span>
 			</button>
-			<button type="button" class="btn-outline-primary" on:click={() => goto('/explore')}>
-				<span>Go Back</span>
-			</button>
-		</div>
-	</form>
+		{/if}
+	{/if}
 </div>
 
 <style>

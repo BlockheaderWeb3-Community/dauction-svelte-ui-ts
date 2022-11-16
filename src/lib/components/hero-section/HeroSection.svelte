@@ -1,3 +1,7 @@
+<script>
+	import { goto } from '$app/navigation';
+</script>
+
 <div class="hero-section">
 	<div class="wrapper">
 		<section class="hero-container">
@@ -7,7 +11,7 @@
 					<span>Sealed-Bidding Auction</span>
 				</h1>
 				<div class="hero-btns">
-					<button class="btn-primary hero-btn-explore">
+					<button class="btn-primary hero-btn-explore" on:click={() => goto('/explore')}>
 						<span>Explore</span>
 						<img src="/icons/arrow-forward-black.svg" alt="" />
 					</button>

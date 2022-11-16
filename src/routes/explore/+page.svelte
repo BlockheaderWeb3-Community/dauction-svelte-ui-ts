@@ -57,7 +57,11 @@
 			// });
 			for (let i = 0; i < auctionsOnDNFT_.length; i++) {
 				let image = await getNFTImage($contracts.nftContract, auctionsOnDNFT_[i].tokenId);
-				let newAuction = await { ...auctionsOnDNFT_[i], image: image };
+				let bidders = [];
+				if (auctionsOnDNFT_[i].auctionStatus == 2) {
+					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
+				}
+				let newAuction = await { ...auctionsOnDNFT_[i], image: image, bidders: bidders };
 				auctionsOnDNFT = [...auctionsOnDNFT, newAuction];
 			}
 
@@ -108,6 +112,12 @@
 		// 	console.log(error);
 		// 	return '';
 		// }
+	};
+	const getBidders = async (nftAddress: string, tokenID: string) => {
+		const biddersDetail = await $contracts.dauctionContract.methods
+			.getBidders(nftAddress, tokenID)
+			.call();
+		return biddersDetail;
 	};
 
 	const handlePlaceBid = async (auction: any) => {
@@ -166,22 +176,49 @@
 											> -->
 										</div>
 										<div class="right">
-											<span>Remaning Time</span>
-											<h4>
-												<CountdownTimer endTime={unixToDate(auction.endTime)} />
-											</h4>
-											<p><span class="usd">{'auction.bids'}</span>bids placed</p>
+											{#if auction.bidders
+												.join('')
+												.toLowerCase()
+												.includes($selectedAccount?.toLowerCase())}
+												<span>Time to Reveal</span>
+												<h4>
+													<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
+												</h4>
+											{:else}
+												<span>Remaning Time</span>
+												<h4>
+													<CountdownTimer endTime={unixToDate(auction.endTime)} />
+												</h4>
+											{/if}
+											<p>
+												<span class="usd">{auction.bidders.length}</span>{`${
+													auction.bidders.length > 1 ? 'bids' : 'bid'
+												} placed`}
+											</p>
 										</div>
 									</div>
-									<!-- {#if datetoUnix(new Date()) < auction.endTime} -->
+									<!-- {#if datetoUnix(new Date()) < auction.endTime}  disabled={datetoUnix(new Date()) >= auction.endTime}-->
 									<div class="auction-btns">
-										<button
-											class="btn-primary auction-btn-place"
-											on:click={() => handlePlaceBid(auction)}
-											disabled={datetoUnix(new Date()) >= auction.endTime}
-										>
-											<span>Place a Bid</span>
-										</button>
+										{#if auction.bidders
+											.join('')
+											.toLowerCase()
+											.includes($selectedAccount?.toLowerCase())}
+											<button
+												class="btn-primary auction-btn-place"
+												on:click={() => handlePlaceBid(auction)}
+												disabled={!datetoUnix(new Date()) >= auction.endTime}
+											>
+												<span>Reveal Bid</span>
+											</button>
+										{:else}
+											<button
+												class="btn-primary auction-btn-place"
+												on:click={() => handlePlaceBid(auction)}
+												disabled={datetoUnix(new Date()) >= auction.endTime}
+											>
+												<span>Place a Bid</span>
+											</button>
+										{/if}
 										<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
 											<span>View</span>
 										</button>
