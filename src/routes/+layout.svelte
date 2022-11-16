@@ -73,9 +73,9 @@
 	const checkNetwork = async (network: any) => {
 		if (!network) return;
 
-		if (network !== 80001) {
+		if (network !== 5) {
 			// goerli
-			alert('Please Choose Mumbai chain');
+			alert('Please Choose Goerli chain');
 			disconnectWallet();
 		}
 	};

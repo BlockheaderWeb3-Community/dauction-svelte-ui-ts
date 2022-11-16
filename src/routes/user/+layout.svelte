@@ -11,62 +11,66 @@
 
 {#if $connected && $selectedAccount !== null}
 	<div class="main">
-		<UserHeader account={$selectedAccount} />
-		<div class="user-main-area">
-			<div class="wrapper">
-				<div class="user-page">
-					<div class="sidebar">
-						<ul>
-							<li>
-								<a href="/user/biddings" class:active={$page.url.pathname.includes('biddings')}>
-									Biddings
-								</a>
-							</li>
-							<li>
-								<a
-									href="/user/owned-assets"
-									class:active={$page.url.pathname.includes('owned-assets')}
-								>
-									Owned Assets
-								</a>
-							</li>
-							<li>
-								<a
-									href="/user/created-assets"
-									class:active={$page.url.pathname.includes('created-assets')}
-								>
-									Created Assets
-								</a>
-							</li>
-							<li>
-								<a
-									href="/user/assets-on-auction"
-									class:active={$page.url.pathname.includes('assets-on-auction')}
-								>
-									Assets on Auction
-								</a>
-							</li>
-							<li>
-								<a href="/user/activity" class:active={$page.url.pathname.includes('activity')}>
-									Activity
-								</a>
-							</li>
-							<li>
-								<a
-									href="/user/liked-assets"
-									class:active={$page.url.pathname.includes('liked-assets')}
-								>
-									Liked Assets</a
-								>
-							</li>
-						</ul>
-					</div>
-					<div class="content">
-						<slot />
+		{#if $page.url.pathname.includes('create-auction')}
+			<slot />
+		{:else}
+			<UserHeader account={$selectedAccount} />
+			<div class="user-main-area">
+				<div class="wrapper">
+					<div class="user-page">
+						<div class="sidebar">
+							<ul>
+								<li>
+									<a href="/user/biddings" class:active={$page.url.pathname.includes('biddings')}>
+										Biddings
+									</a>
+								</li>
+								<li>
+									<a
+										href="/user/owned-assets"
+										class:active={$page.url.pathname.includes('owned-assets')}
+									>
+										Owned Assets
+									</a>
+								</li>
+								<li>
+									<a
+										href="/user/created-assets"
+										class:active={$page.url.pathname.includes('created-assets')}
+									>
+										Created Assets
+									</a>
+								</li>
+								<li>
+									<a
+										href="/user/assets-on-auction"
+										class:active={$page.url.pathname.includes('assets-on-auction')}
+									>
+										Assets on Auction
+									</a>
+								</li>
+								<li>
+									<a href="/user/activity" class:active={$page.url.pathname.includes('activity')}>
+										Activity
+									</a>
+								</li>
+								<li>
+									<a
+										href="/user/liked-assets"
+										class:active={$page.url.pathname.includes('liked-assets')}
+									>
+										Liked Assets</a
+									>
+								</li>
+							</ul>
+						</div>
+						<div class="content">
+							<slot />
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 	<NeverMissSection />
 {/if}
