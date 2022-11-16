@@ -20,3 +20,8 @@ export const CURRENCIES = [
 		address: '0xda469e02e3d939c3ffafa5e8bf9569ccffe8da0d'
 	}
 ];
+
+export const DELAY_MINUTES = 3;
+
+export const DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI = '0xcef7ac5c9a677db855f5a216f3c93f9e7c8cd78a';
+export const NFT_CONTRACT_ADDRESS_ON_GOERLI = '0x17d76D5776505eD9F60030eb8744B88A96ff9e84';

@@ -5,6 +5,7 @@
 	import { page } from '$app/stores';
 	import UserHeader from '$lib/components/user/UserHeader.svelte';
 	import NeverMissSection from '$lib/components/never-miss-section/NeverMissSection.svelte';
+	import NotConnected from '$lib/components/not-connected/NotConnected.svelte';
 
 	onMount(() => {});
 </script>
@@ -73,6 +74,8 @@
 		{/if}
 	</div>
 	<NeverMissSection />
+{:else}
+	<NotConnected />
 {/if}
 
 <style>

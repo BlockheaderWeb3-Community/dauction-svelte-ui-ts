@@ -16,7 +16,6 @@
 
 	// $: promise = getImage();
 
-	// $: console.log('nftContractzMethods_______', $contracts.nftContractz?.methods);
 	$: console.log('dacutionContractMethods___________', $contracts.dauctionContract?.methods);
 	$: console.log('dacutionContract___________', $contracts.dauctionContract);
 

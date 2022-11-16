@@ -1,26 +1,106 @@
 <script lang="ts">
 	// import { DateInput } from 'date-picker-svelte';
 	// import { TimePicker } from 'svelte-time-picker';
+	import {
+		connected,
+		chainId,
+		selectedAccount,
+		defaultEvmStores as evm,
+		web3,
+		//@ts-ignore
+		contracts
+	} from 'svelte-web3';
 	import NumberInput from '$lib/components/reusables/NumberInput.svelte';
 	import TextInput from '$lib/components/reusables/TextInput.svelte';
 	import TimeInput from '$lib/components/reusables/TimeInput.svelte';
 	import DateInput from '$lib/components/reusables/DateInput.svelte';
+	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
+	import { CURRENCIES, DELAY_MINUTES, NFT_CONTRACT_ADDRESS_ON_GOERLI } from '$lib/utils/constants';
+	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
+	import { onMount } from 'svelte/internal';
+
+	import { openModal, closeModal } from 'svelte-modals';
+	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 
 	let formState = {
 		nftContractAddress: '',
 		tokenId: '',
 		baseBid: 0,
-		startDate: null,
-		startTime: null,
-		endDate: null,
-		endTime: null,
+		startDate: '',
+		startTime: '',
+		endDate: '',
+		endTime: '',
 		revealDuration: 0
 	};
 
-	let errors = [];
+	let approved = false;
 
-	const createAuction = () => {
-		// add 3mins 180
+	onMount(async () => {});
+
+	const checkTokenId = async (tokenId: string) => {
+		approved = false;
+		if (!tokenId) return;
+		openModal(LoadingModal);
+		getApprovalStatus(tokenId);
+		console.log(approved);
+	};
+
+	const getApprovalStatus = async (tokenId: string) => {
+		try {
+			const getAppr = await $contracts.nftContract.methods.getApproved(tokenId).call();
+			console.log('get appr_______', getAppr);
+			if (getAppr === NFT_CONTRACT_ADDRESS_ON_GOERLI) {
+				approved = true;
+				closeModal();
+				return;
+			} else {
+				approved = false;
+				closeModal();
+				return;
+			}
+			// alert('Please Approve Dauction Contract');
+		} catch (error: any) {
+			approved = false;
+			const msg = error.message;
+			alert(msg.split('{')[0]);
+			closeModal();
+			return;
+		}
+	};
+
+	const createAuction = async ({
+		nftAddress,
+		tokenId,
+		minBidPrice,
+		startTime,
+		endTime,
+		revealDuration
+	}: {
+		nftAddress: string;
+		tokenId: string;
+		minBidPrice: number;
+		startTime: number;
+		endTime: number;
+		revealDuration: number;
+	}) => {
+		// call contract
+
+		if (approved === false) {
+			return;
+		}
+		try {
+			const newAuction = await $contracts.dauctionContract.methods
+				.createAuction(nftAddress, tokenId, minBidPrice, startTime, endTime, revealDuration)
+				.call();
+			// alert(`Take Note Of Your hashCommitment`);
+			alert(`Auction Created`);
+			console.log(newAuction);
+		} catch (error: any) {
+			console.log(error);
+			const msg = error.message;
+			alert(msg.split('{')[0]);
+			return;
+		}
 	};
 
 	const onSubmit = () => {
@@ -35,7 +115,25 @@
 			}
 		}
 
-		alert(JSON.stringify(formState));
+		// Check getApprovalStatus
+		getApprovalStatus(formState.tokenId);
+
+		const finalStartTime =
+			datetoUnix(combineDateTime(formState.startDate, formState.startTime)) +
+			minsToUnix(DELAY_MINUTES); // Add 3mins for delays
+		const finalEndTime =
+			datetoUnix(combineDateTime(formState.endDate, formState.endTime)) + minsToUnix(DELAY_MINUTES); // Add 3mins for delays
+		const finalRevealDuration = finalEndTime + minsToUnix(formState.revealDuration);
+
+		createAuction({
+			nftAddress: formState.nftContractAddress,
+			tokenId: formState.tokenId,
+			minBidPrice: formState.baseBid,
+			startTime: finalStartTime,
+			endTime: finalEndTime,
+			revealDuration: finalRevealDuration
+		});
+		// alert(JSON.stringify(formState));
 	};
 </script>
 
@@ -49,13 +147,26 @@
 			required={true}
 			bind:value={formState.nftContractAddress}
 		/>
-		<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
+		<TextInput
+			label="Token Id"
+			name="tokenId"
+			required={true}
+			bind:value={formState.tokenId}
+			on:blur={() => checkTokenId(formState.tokenId)}
+		/>
 		<NumberInput
-			label="Starting Bid Price"
+			label="Starting Bid Price ($)"
 			name="baseBid"
 			required={true}
 			bind:value={formState.baseBid}
 		/>
+		<!-- <CurrencySelector
+			data={CURRENCIES}
+			label="Choose Currency"
+			name="currencyAddress"
+			required={true}
+			bind:value={formState.currencyAddress}
+		/> -->
 		<div class="collection">
 			<span>Start Date & Time</span>
 			<div>
@@ -71,17 +182,17 @@
 			</div>
 		</div>
 		<NumberInput
-			label="Time Before Alowing Bid Reveals"
+			label="Time Before Allowing Bid Reveals (mins)"
 			name="revealDuration"
 			required={true}
 			bind:value={formState.revealDuration}
 		/>
 		<div class="cta">
-			<button type="submit" class="btn-primary submit">
+			<button type="submit" class="btn-primary submit" disabled={!approved}>
 				<span>Create Auction</span>
 			</button>
-			<button type="submit" class="btn-outline-primary">
-				<span>Go Back</span>
+			<button type="submit" class="btn-outline-primary" disabled={approved}>
+				<span>Grant Approval</span>
 			</button>
 		</div>
 	</form>
@@ -131,5 +242,13 @@
 
 	.create-auction form .cta button {
 		width: 50%;
+	}
+
+	.create-auction form .cta button:disabled,
+	.create-auction form .cta button[disabled] {
+		border: 1px solid #999999;
+		background-color: #cccccc;
+		color: #666666;
+		cursor: not-allowed;
 	}
 </style>

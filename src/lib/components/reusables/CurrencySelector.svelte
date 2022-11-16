@@ -22,10 +22,10 @@
 		</label>
 	{/if}
 
-	<select {name}>
+	<select {name} bind:value>
 		{#each data as d}
 			<option value={d.address}>
-				<img src={d.image} alt="" />
+				<!-- <img src={d.image} alt="" /> -->
 				<span>{d.name}</span>
 			</option>
 		{/each}

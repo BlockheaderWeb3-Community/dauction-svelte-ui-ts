@@ -3,6 +3,13 @@
 	export let label: string;
 	export let required = false;
 	export let value: string;
+	// export let blur: any;
+
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
+	const onBlur = (e: any) => {
+		dispatch('blur', e.target.value);
+	};
 </script>
 
 <fieldset>
@@ -14,7 +21,7 @@
 			{/if}
 		</label>
 	{/if}
-	<input type="text" {name} {required} bind:value />
+	<input type="text" {name} {required} bind:value on:blur={onBlur} />
 </fieldset>
 
 <style>

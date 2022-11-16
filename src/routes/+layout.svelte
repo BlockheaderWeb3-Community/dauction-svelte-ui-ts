@@ -3,16 +3,18 @@
 	import Footer from '$lib/components/footer/Footer.svelte';
 	import './styles.css';
 
+	import { Modals, closeModal } from 'svelte-modals';
+
 	import { onMount } from 'svelte';
 	import { web3Modal } from '$lib/stores/main';
 	import { ethers } from 'ethers';
 
 	import Dauction from '$lib/contracts/Dauction.json';
-	import MockUSDT from '$lib/contracts/MockUSDT.json';
+	// import MockUSDT from '$lib/contracts/MockUSDT.json';
 	import NFTContract from '$lib/contracts/NFTContract.json';
-	import ERC721 from '$lib/contracts/ERC721.json';
+	// import ERC721 from '$lib/contracts/ERC721.json';
 	//@ts-ignore
-	import NFT from '$lib/contracts/NFT.json';
+	// import NFT from '$lib/contracts/NFT.json';
 
 	import {
 		connected,
@@ -29,15 +31,19 @@
 	import Web3Modal from 'web3modal';
 	import { browserGet, browserSet } from '$lib/utils/requestUtils';
 	import { variables } from '$lib/variables';
+	import {
+		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
+		NFT_CONTRACT_ADDRESS_ON_GOERLI
+	} from '$lib/utils/constants';
 
-	const DAUCTION_ADDRESS_ON_MUMBAI = '0x9c21864573e04C8c2e601c4B25d8595125490a08';
 	// const MOCK_USDT_ADDRESS_ON_MUMBAI = '0x8a103012233e0885285C571ef8C627C3d65408c0';
-	const NFT_CONTRACT_ADDRESS_ON_MUMBAI = '0x130e8c89F3583BD4329496D88124877Fc52D1A86';
 
 	// const NFT_ADDRESS_ON_GOERLI = '0xFc5981357a457A39CC246fB7ce4b7093b348978b';
 
 	//@ts-ignore
-	evm.attachContract('dauctionContract', DAUCTION_ADDRESS_ON_MUMBAI, Dauction.abi);
+	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, Dauction.abi);
+	//@ts-ignore
+	evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_GOERLI, NFTContract.abi);
 	//@ts-ignore
 	// evm.attachContract('mockUSDTConract', MOCK_USDT_ADDRESS_ON_MUMBAI, MockUSDT.abi);
 
@@ -47,7 +53,7 @@
 	// };
 
 	//@ts-ignore
-	evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_MUMBAI, NFTContract.abi);
+	// evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_MUMBAI, NFTContract.abi);
 
 	//@ts-ignore
 	// evm.attachContract('nftContractz', NFT_ADDRESS_ON_GOERLI, NFT);
@@ -85,7 +91,6 @@
 	}
 
 	$: checkNetwork($chainId);
-	console.log(ethers);
 	onMount(() => {
 		if (typeof window.ethereum === 'undefined') {
 			alert('Please Install MetaMask');
@@ -111,7 +116,10 @@
 	// $: console.log('cache', web3Modal?.cacheProvider);
 </script>
 
-<!-- <div class="app"> -->
+<Modals>
+	<div slot="backdrop" class="backdrop" on:click={closeModal} />
+</Modals>
+
 <Header {disconnectWallet} />
 
 <main>
@@ -119,4 +127,14 @@
 </main>
 
 <Footer />
-<!-- </div> -->
+
+<style>
+	.backdrop {
+		position: fixed;
+		top: 0;
+		bottom: 0;
+		right: 0;
+		left: 0;
+		background: rgba(0, 0, 0, 0.5);
+	}
+</style>

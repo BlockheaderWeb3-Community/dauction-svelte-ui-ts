@@ -45,7 +45,7 @@
 
 <style>
 	footer {
-		background-image: url('images/backgrounds/footer-bg.png');
+		background-image: url('/images/backgrounds/footer-bg.png');
 		background-repeat: no-repeat;
 		background-position: center top;
 		background-size: cover;
