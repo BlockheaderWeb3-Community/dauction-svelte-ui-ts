@@ -24,8 +24,8 @@
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
 
-	import { openModal, closeModal } from 'svelte-modals';
-	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
+		import { openModal, closeModal } from 'svelte-modals';
+		import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
 
 	let formState = {
