@@ -15,12 +15,18 @@
 	import TimeInput from '$lib/components/reusables/TimeInput.svelte';
 	import DateInput from '$lib/components/reusables/DateInput.svelte';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
-	import { CURRENCIES, DELAY_MINUTES, NFT_CONTRACT_ADDRESS_ON_GOERLI } from '$lib/utils/constants';
+	import {
+		CURRENCIES,
+		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
+		DELAY_MINUTES,
+		NFT_CONTRACT_ADDRESS_ON_GOERLI
+	} from '$lib/utils/constants';
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
 
 	import { openModal, closeModal } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
+	import { fromWei, toWei } from '$lib/utils/conversionUtils';
 
 	let formState = {
 		nftContractAddress: '',
@@ -49,7 +55,7 @@
 		try {
 			const getAppr = await $contracts.nftContract.methods.getApproved(tokenId).call();
 			console.log('get appr_______', getAppr);
-			if (getAppr === NFT_CONTRACT_ADDRESS_ON_GOERLI) {
+			if (getAppr.toLowerCase() === DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI.toLowerCase()) {
 				approved = true;
 				closeModal();
 				return;
@@ -59,6 +65,24 @@
 				return;
 			}
 			// alert('Please Approve Dauction Contract');
+		} catch (error: any) {
+			approved = false;
+			const msg = error.message;
+			alert(msg.split('{')[0]);
+			closeModal();
+			return;
+		}
+	};
+
+	const setApproval = async (tokenId: string) => {
+		openModal(LoadingModal);
+		try {
+			const setAppr = await $contracts.nftContract.methods
+				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, tokenId)
+				.send({ from: $selectedAccount });
+			console.log('set appr_______', setAppr);
+			approved = true;
+			closeModal();
 		} catch (error: any) {
 			approved = false;
 			const msg = error.message;
@@ -78,7 +102,7 @@
 	}: {
 		nftAddress: string;
 		tokenId: string;
-		minBidPrice: number;
+		minBidPrice: any;
 		startTime: number;
 		endTime: number;
 		revealDuration: number;
@@ -88,24 +112,26 @@
 		if (approved === false) {
 			return;
 		}
+		console.log(nftAddress, tokenId, minBidPrice, startTime, endTime, revealDuration);
 		try {
 			const newAuction = await $contracts.dauctionContract.methods
 				.createAuction(nftAddress, tokenId, minBidPrice, startTime, endTime, revealDuration)
-				.call();
+				.send({ from: $selectedAccount });
+			console.log('new Auction _______', newAuction);
 			// alert(`Take Note Of Your hashCommitment`);
+			closeModal();
 			alert(`Auction Created`);
-			console.log(newAuction);
 		} catch (error: any) {
 			console.log(error);
 			const msg = error.message;
+			closeModal();
 			alert(msg.split('{')[0]);
 			return;
 		}
 	};
 
 	const onSubmit = () => {
-		// TODO Form Validations
-
+		openModal(LoadingModal);
 		let k: keyof typeof formState;
 		for (k in formState) {
 			const v = formState[k];
@@ -124,11 +150,12 @@
 		const finalEndTime =
 			datetoUnix(combineDateTime(formState.endDate, formState.endTime)) + minsToUnix(DELAY_MINUTES); // Add 3mins for delays
 		const finalRevealDuration = finalEndTime + minsToUnix(formState.revealDuration);
+		const baseBidToWei = toWei(formState.baseBid);
 
 		createAuction({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
-			minBidPrice: formState.baseBid,
+			minBidPrice: baseBidToWei,
 			startTime: finalStartTime,
 			endTime: finalEndTime,
 			revealDuration: finalRevealDuration
@@ -191,7 +218,12 @@
 			<button type="submit" class="btn-primary submit" disabled={!approved}>
 				<span>Create Auction</span>
 			</button>
-			<button type="submit" class="btn-outline-primary" disabled={approved}>
+			<button
+				type="button"
+				class="btn-outline-primary"
+				disabled={approved}
+				on:click={() => setApproval(formState.tokenId)}
+			>
 				<span>Grant Approval</span>
 			</button>
 		</div>
