@@ -27,103 +27,43 @@
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
 	import { currentAuction } from '$lib/stores/main';
 	import { goto } from '$app/navigation';
+	import { createSalt, hashCommitmentParams, theRandomNumber } from '$lib/utils/hexUtils';
 
 	let formState = {
 		nftContractAddress: '',
 		tokenId: '',
-		baseBid: 0,
-		startDate: '',
-		startTime: '',
-		endDate: '',
-		endTime: '',
-		revealDuration: 0
+		bidPrice: 0,
+		currencyAddress: ''
 	};
 
-	let approved = false;
-
 	onMount(async () => {
-		// uncomment for ended bids
-		// if (datetoUnix(new Date()) >= $currentAuction.endTime) {
-		// 	goto('/explore');
-		// }
 		if (!$currentAuction) {
+			goto('/explore');
+		}
+		if (datetoUnix(new Date()) >= $currentAuction.endTime) {
 			goto('/explore');
 		}
 	});
 
-	const checkTokenId = async (tokenId: string) => {
-		approved = false;
-		if (!tokenId) return;
-		openModal(LoadingModal);
-		getApprovalStatus(tokenId);
-		console.log(approved);
-	};
-
-	const getApprovalStatus = async (tokenId: string) => {
-		try {
-			const getAppr = await $contracts.nftContract.methods.getApproved(tokenId).call();
-			console.log('get appr_______', getAppr);
-			if (getAppr.toLowerCase() === DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI.toLowerCase()) {
-				approved = true;
-				closeModal();
-				return;
-			} else {
-				approved = false;
-				closeModal();
-				return;
-			}
-			// alert('Please Approve Dauction Contract');
-		} catch (error: any) {
-			approved = false;
-			const msg = error.message;
-			alert(msg.split('{')[0]);
-			closeModal();
-			return;
-		}
-	};
-
-	const setApproval = async (tokenId: string) => {
-		openModal(LoadingModal);
-		try {
-			const setAppr = await $contracts.nftContract.methods
-				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, tokenId)
-				.send({ from: $selectedAccount });
-			console.log('set appr_______', setAppr);
-			approved = true;
-			closeModal();
-		} catch (error: any) {
-			approved = false;
-			const msg = error.message;
-			alert(msg.split('{')[0]);
-			closeModal();
-			return;
-		}
-	};
-
-	const createAuction = async ({
+	const createBid = async ({
 		nftAddress,
 		tokenId,
-		minBidPrice,
-		startTime,
-		endTime,
-		revealDuration
+		bidCommitment,
+		bidToken
 	}: {
 		nftAddress: string;
 		tokenId: string;
-		minBidPrice: any;
-		startTime: number;
-		endTime: number;
-		revealDuration: number;
+		bidCommitment: string;
+		bidToken: string;
 	}) => {
-		// call contract
+		console.log(nftAddress, tokenId, bidCommitment, bidToken);
 
-		if (approved === false) {
-			return;
-		}
-		console.log(nftAddress, tokenId, minBidPrice, startTime, endTime, revealDuration);
+		closeModal();
+		return;
+
 		try {
 			const newAuction = await $contracts.dauctionContract.methods
-				.createAuction(nftAddress, tokenId, minBidPrice, startTime, endTime, revealDuration)
+				.createAuction(nftAddress, tokenId, bidCommitment, bidToken)
 				.send({ from: $selectedAccount });
 			console.log('new Auction _______', newAuction);
 			// alert(`Take Note Of Your hashCommitment`);
@@ -148,27 +88,20 @@
 				return;
 			}
 		}
+		if (formState.bidPrice <= Number(fromWei($currentAuction.minBidPrice))) {
+			alert('Bid cannot be less than base bid');
+			closeModal();
+			return;
+		}
 
-		// Check getApprovalStatus
-		getApprovalStatus(formState.tokenId);
+		const bidCommitment = hashCommitmentParams(formState.bidPrice, createSalt(theRandomNumber));
 
-		const finalStartTime =
-			datetoUnix(combineDateTime(formState.startDate, formState.startTime)) +
-			minsToUnix(DELAY_MINUTES); // Add 3mins for delays
-		const finalEndTime =
-			datetoUnix(combineDateTime(formState.endDate, formState.endTime)) + minsToUnix(DELAY_MINUTES); // Add 3mins for delays
-		const finalRevealDuration = finalEndTime + minsToUnix(formState.revealDuration);
-		const baseBidToWei = toWei(formState.baseBid);
-
-		createAuction({
+		createBid({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
-			minBidPrice: baseBidToWei,
-			startTime: finalStartTime,
-			endTime: finalEndTime,
-			revealDuration: finalRevealDuration
+			bidCommitment: bidCommitment,
+			bidToken: formState.currencyAddress
 		});
-		// alert(JSON.stringify(formState));
 	};
 </script>
 
@@ -182,57 +115,29 @@
 			required={true}
 			bind:value={formState.nftContractAddress}
 		/>
-		<TextInput
-			label="Token Id"
-			name="tokenId"
-			required={true}
-			bind:value={formState.tokenId}
-			on:blur={() => checkTokenId(formState.tokenId)}
-		/>
+		<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
 		<NumberInput
-			label="Starting Bid Price ($)"
+			label="Bid Price ($)"
 			name="baseBid"
 			required={true}
-			bind:value={formState.baseBid}
+			bind:value={formState.bidPrice}
+			info={`Base bid - $${$currentAuction && fromWei($currentAuction.minBidPrice)}`}
 		/>
-		<!-- <CurrencySelector
+		<!-- <span></span> -->
+		<CurrencySelector
 			data={CURRENCIES}
 			label="Choose Currency"
 			name="currencyAddress"
 			required={true}
 			bind:value={formState.currencyAddress}
-		/> -->
-		<div class="collection">
-			<span>Start Date & Time</span>
-			<div>
-				<DateInput label="" name="startDate" required={true} bind:value={formState.startDate} />
-				<TimeInput label="" name="startTime" required={true} bind:value={formState.startTime} />
-			</div>
-		</div>
-		<div class="collection">
-			<span>End Date & Time</span>
-			<div>
-				<DateInput label="" name="startDate" required={true} bind:value={formState.endDate} />
-				<TimeInput label="" name="startTime" required={true} bind:value={formState.endTime} />
-			</div>
-		</div>
-		<NumberInput
-			label="Time Before Allowing Bid Reveals (mins)"
-			name="revealDuration"
-			required={true}
-			bind:value={formState.revealDuration}
 		/>
+
 		<div class="cta">
-			<button type="submit" class="btn-primary submit" disabled={!approved}>
-				<span>Create Auction</span>
+			<button type="submit" class="btn-primary submit">
+				<span>Place Bid</span>
 			</button>
-			<button
-				type="button"
-				class="btn-outline-primary"
-				disabled={approved}
-				on:click={() => setApproval(formState.tokenId)}
-			>
-				<span>Grant Approval</span>
+			<button type="button" class="btn-outline-primary" on:click={() => goto('/explore')}>
+				<span>Go Back</span>
 			</button>
 		</div>
 	</form>

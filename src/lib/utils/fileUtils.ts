@@ -1,4 +1,4 @@
 const svgPath = (name: string) => {
-	return `/${name}.svg`;
+	return `/icons/${name}.svg`;
 };
 export { svgPath };

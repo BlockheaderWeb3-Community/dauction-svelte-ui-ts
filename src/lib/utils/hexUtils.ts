@@ -1,5 +1,8 @@
 import { ethers } from 'ethers';
 
+
+const theRandomNumber = Math.floor(Math.random() * 1000000) + 1;
+
 // num to bytes32
 const hexify = (payload: number) => ethers.utils.hexZeroPad(ethers.utils.hexlify(payload), 32);
 
@@ -22,4 +25,4 @@ const unveilHashCommitment = (bidder: string, bidCommitment: string, bidToken: s
 
 const ZERO_BYTES_32 = hexify(0);
 
-export { hexify, hashCommitmentParams, createSalt, ZERO_BYTES_32, unveilHashCommitment };
+export { hexify, hashCommitmentParams, createSalt, ZERO_BYTES_32, unveilHashCommitment, theRandomNumber };

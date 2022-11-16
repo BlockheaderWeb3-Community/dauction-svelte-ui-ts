@@ -192,7 +192,9 @@
 							</div>
 						</div>
 					{:else}
-						<h1>Noting to Display</h1>
+						<div class="title">
+							<h1>Noting to Display</h1>
+						</div>
 					{/each}
 				</div>
 			</div>
@@ -275,5 +277,12 @@
 	.explore .auction-card:hover .bg {
 		display: block;
 		z-index: -1;
+	}
+
+	.explore-auctions-section .title {
+		text-align: center;
+		width: 100%;
+		color: var(--white-background);
+		grid-column-end: span 4;
 	}
 </style>

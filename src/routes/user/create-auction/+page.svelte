@@ -27,6 +27,7 @@
 	import { openModal, closeModal } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
+	import { goto } from '$app/navigation';
 
 	let formState = {
 		nftContractAddress: '',
@@ -122,6 +123,7 @@
 			// alert(`Take Note Of Your hashCommitment`);
 			closeModal();
 			alert(`Auction Created`);
+			goto('/explore');
 		} catch (error: any) {
 			console.log(error);
 			const msg = error.message;

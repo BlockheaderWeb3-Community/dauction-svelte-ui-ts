@@ -1,8 +1,11 @@
 <script lang="ts">
+	import { svgPath } from '$lib/utils/fileUtils';
+
 	export let name: string;
 	export let label: string;
 	export let required = false;
 	export let value: number;
+	export let info = '';
 </script>
 
 <fieldset>
@@ -15,6 +18,12 @@
 		</label>
 	{/if}
 	<input type="number" {name} {required} bind:value />
+	{#if info}
+		<p>
+			<img src={svgPath('info')} alt="" width="15" />
+			<span>{info}</span>
+		</p>
+	{/if}
 </fieldset>
 
 <style>
@@ -52,5 +61,22 @@
 
 	fieldset input:focus {
 		outline: none;
+	}
+
+	fieldset p {
+		padding: 0;
+		margin: 0;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+	}
+
+	fieldset img {
+		display: inline;
+	}
+
+	fieldset span {
+		display: block;
+		margin-top: -3px;
 	}
 </style>
