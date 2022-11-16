@@ -1,6 +1,4 @@
 <script lang="ts">
-	// import { DateInput } from 'date-picker-svelte';
-	// import { TimePicker } from 'svelte-time-picker';
 	import {
 		connected,
 		chainId,
@@ -27,6 +25,8 @@
 	import { openModal, closeModal } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
+	import { currentAuction } from '$lib/stores/main';
+	import { goto } from '$app/navigation';
 
 	let formState = {
 		nftContractAddress: '',
@@ -41,7 +41,15 @@
 
 	let approved = false;
 
-	onMount(async () => {});
+	onMount(async () => {
+		// uncomment for ended bids
+		// if (datetoUnix(new Date()) >= $currentAuction.endTime) {
+		// 	goto('/explore');
+		// }
+		if (!$currentAuction) {
+			goto('/explore');
+		}
+	});
 
 	const checkTokenId = async (tokenId: string) => {
 		approved = false;
@@ -107,7 +115,6 @@
 		endTime: number;
 		revealDuration: number;
 	}) => {
-		openModal(LoadingModal);
 		// call contract
 
 		if (approved === false) {
@@ -165,8 +172,8 @@
 	};
 </script>
 
-<div class="create-auction">
-	<h1 class="title">Create Auction</h1>
+<div class="create-bid">
+	<h1 class="title">Create Bid</h1>
 
 	<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
 		<TextInput
@@ -232,7 +239,7 @@
 </div>
 
 <style>
-	.create-auction {
+	.create-bid {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
@@ -240,48 +247,40 @@
 		color: var(--white-background);
 	}
 
-	.create-auction .title {
+	.create-bid .title {
 		font-family: 'Darker Grotesque';
 		font-weight: 500;
 		font-size: 88px;
 		line-height: 85%;
 	}
 
-	.create-auction form {
+	.create-bid form {
 		width: 588px;
 		display: flex;
 		flex-direction: column;
 		gap: 24px;
 	}
 
-	/* .create-auction form .collection {
+	/* .create-bid form .collection {
 	} */
 
-	.create-auction form .collection span {
+	.create-bid form .collection span {
 		font-weight: 500;
 		font-size: 20px;
 		padding: 16px;
 	}
-	.create-auction form .collection div {
+	.create-bid form .collection div {
 		display: flex;
 	}
 
-	.create-auction form .cta {
+	.create-bid form .cta {
 		display: flex;
 		width: 100%;
 		justify-content: space-between;
 		gap: 10px;
 	}
 
-	.create-auction form .cta button {
+	.create-bid form .cta button {
 		width: 50%;
-	}
-
-	.create-auction form .cta button:disabled,
-	.create-auction form .cta button[disabled] {
-		border: 1px solid #999999;
-		background-color: #cccccc;
-		color: #666666;
-		cursor: not-allowed;
 	}
 </style>

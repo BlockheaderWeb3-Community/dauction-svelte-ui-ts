@@ -14,6 +14,11 @@
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { NFT_CONTRACT_ADDRESS_ON_GOERLI } from '$lib/utils/constants';
 	import ExploreCardTopTemplate from '$lib/components/ExploreCardTopTemplate.svelte';
+	import { goto } from '$app/navigation';
+	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
+	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
+	import { currentAuction } from '$lib/stores/main';
+	import { formatPrice, fromWei } from '$lib/utils/conversionUtils';
 
 	let auctionsOnDNFT: any[] = [];
 	let auctionsOnDNFT_: any[] = [];
@@ -104,6 +109,11 @@
 		// 	return '';
 		// }
 	};
+
+	const handlePlaceBid = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/bid-auction/${auction.tokenId}`);
+	};
 </script>
 
 <div class="wrapper">
@@ -150,25 +160,33 @@
 									<div class="auction-card-bottom">
 										<div class="left">
 											<span>Base Bid</span>
-											<h4>${auction.minBidPrice.toLocaleString()}</h4>
+											<h4>${formatPrice(auction.minBidPrice)}</h4>
 											<!-- <span class="usd" style="font-weight: 700"
 												>${auction.minBidPrice.toLocaleString()}</span
 											> -->
 										</div>
 										<div class="right">
 											<span>Remaning Time</span>
-											<h4>09h 24m 02s</h4>
+											<h4>
+												<CountdownTimer endTime={unixToDate(auction.endTime)} />
+											</h4>
 											<p><span class="usd">{'auction.bids'}</span>bids placed</p>
 										</div>
 									</div>
+									<!-- {#if datetoUnix(new Date()) < auction.endTime} -->
 									<div class="auction-btns">
-										<button class="btn-primary auction-btn-place">
+										<button
+											class="btn-primary auction-btn-place"
+											on:click={() => handlePlaceBid(auction)}
+											disabled={datetoUnix(new Date()) >= auction.endTime}
+										>
 											<span>Place a Bid</span>
 										</button>
 										<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
 											<span>View</span>
 										</button>
 									</div>
+									<!-- {/if} -->
 								</div>
 								<div class="bg " />
 							</div>
