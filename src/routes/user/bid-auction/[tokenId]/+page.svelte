@@ -13,6 +13,7 @@
 	import TimeInput from '$lib/components/reusables/TimeInput.svelte';
 	import DateInput from '$lib/components/reusables/DateInput.svelte';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
+	import { ethers } from 'ethers';
 	import {
 		CURRENCIES,
 		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
@@ -99,14 +100,16 @@
 			alert('Auctioneer cannot place bid');
 			return;
 		}
-		if (formState.bidPrice <= Number(fromWei($currentAuction.minBidPrice))) {
-			closeModal();
-			alert('Bid cannot be less than base bid');
-			return;
-		}
+		// if (formState.bidPrice <= Number(fromWei($currentAuction.minBidPrice))) {
+		// 	closeModal();
+		// 	alert('Bid cannot be less than base bid');
+		// 	return;
+		// }
 
 		const salt = createSalt(theRandomNumber);
-		const bidCommitment = hashCommitmentParams(formState.bidPrice, salt);
+		const newPrice = ethers.BigNumber.from(toWei(formState.bidPrice));
+		console.log('new PRice', newPrice);
+		const bidCommitment = hashCommitmentParams(newPrice, salt);
 
 		createBid({
 			nftAddress: formState.nftContractAddress,
@@ -122,7 +125,7 @@
 	<h1 class="title">Create Bid</h1>
 	{#if $currentAuction?.owner?.toLowerCase() === $selectedAccount?.toLowerCase()}
 		<h1>You Cant Bid on Your Own Auction</h1>
-	{:else if !$currentAuction.bidders
+	{:else if !$currentAuction?.bidders
 		.join('')
 		.toLowerCase()
 		.includes($selectedAccount?.toLowerCase())}

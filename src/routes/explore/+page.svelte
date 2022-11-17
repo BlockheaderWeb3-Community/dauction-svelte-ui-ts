@@ -42,7 +42,7 @@
 		try {
 			openModal(LoadingModal);
 			await getTotalMintedNFTs();
-			for (let i = 0; i < 9; i++) {
+			for (let i = 0; i < totalMinted; i++) {
 				let auction = await getAuctionDetails(NFT_CONTRACT_ADDRESS_ON_GOERLI, `${i}`);
 				if (auction.owner !== '0x0000000000000000000000000000000000000000') {
 					auctionsOnDNFT_ = [...auctionsOnDNFT_, { tokenId: i, ...auction }];
@@ -58,7 +58,7 @@
 			for (let i = 0; i < auctionsOnDNFT_.length; i++) {
 				let image = await getNFTImage($contracts.nftContract, auctionsOnDNFT_[i].tokenId);
 				let bidders = [];
-				if (auctionsOnDNFT_[i].auctionStatus == 2) {
+				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
 					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
 				}
 				let newAuction = await { ...auctionsOnDNFT_[i], image: image, bidders: bidders };
@@ -185,7 +185,7 @@
 												.join('')
 												.toLowerCase()
 												.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
-												<span>Time to Reveal</span>
+												<span>Time left to reveal</span>
 												<h4>
 													<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
 												</h4>

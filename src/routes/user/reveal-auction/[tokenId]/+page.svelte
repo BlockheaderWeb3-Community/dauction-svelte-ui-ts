@@ -19,6 +19,7 @@
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
 
+	import MockToken from '$lib/contracts/MockToken.json';
 	import { openModal, closeModal, closeAllModals } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
@@ -38,6 +39,39 @@
 	};
 
 	let approved = false;
+
+	const checkAllowance = async (address: string) => {
+		approved = false;
+		// if (!tokenId) return;
+		// openModal(LoadingModal);
+		// getApprovalStatus(tokenId);
+		console.log(approved);
+	};
+
+	const getAllowanceStatus = async (address: string) => {
+		// try {
+		// 	//@ts-ignore
+		// 	await evm.attachContract('mockToken', address, MockToken.abi);
+		// 	const getAll = await $contracts.mockToken.methods.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI).call();
+		// 	console.log('get allo___', getAll);
+		// 	if (getAll == 0) {
+		// 		approved = true;
+		// 		closeModal();
+		// 		return;
+		// 	} else {
+		// 		approved = false;
+		// 		closeModal();
+		// 		return;
+		// 	}
+		// 	// alert('Please Approve Dauction Contract');
+		// } catch (error: any) {
+		// 	approved = false;
+		// 	const msg = error.message;
+		// 	alert(msg.split('{')[0]);
+		// 	closeModal();
+		// 	return;
+		// }
+	};
 
 	onMount(async () => {
 		if (!$currentAuction) {
