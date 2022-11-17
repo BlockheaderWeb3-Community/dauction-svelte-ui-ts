@@ -81,7 +81,7 @@
 								<div class="left">
 									<span>Base Bid</span>
 									<h4>${formatPrice(auction.minBidPrice)}</h4>
-									<!-- <span class="usd">${auction.usd_price.toLocaleString()}</span> -->
+									<span class="usd">{`Token ID - [${auction.tokenId}]`}</span>
 								</div>
 								<div class="right">
 									<!-- {#if $selectedAccount && auction.bidders

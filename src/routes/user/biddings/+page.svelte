@@ -26,7 +26,7 @@
 
 	const handleRevealBid = async (auction: any) => {
 		await currentAuction.set(auction);
-		goto(`/user/reveal-auction/${auction.tokenId}`);
+		goto(`/user/reveal-bid/${auction.tokenId}`);
 	};
 
 	/* const auction: Auction = {
@@ -71,10 +71,10 @@
 			</div>
 		</div>
 		<div class="auctions-container">
-			{#each sortArrayofObjects($AVAILABLE_AUCTIONS.filter((x) => $selectedAccount && x.bidders
-						.join('')
-						.toLowerCase()
-						.includes($selectedAccount?.toLowerCase())), 'tokenId') as auction}
+			{#each sortArrayofObjects( $AVAILABLE_AUCTIONS.filter((x) => $selectedAccount && x.bidders
+							.join('')
+							.toLowerCase()
+							.includes($selectedAccount?.toLowerCase())), 'tokenId' ) as auction}
 				<div class="auction">
 					<div class="auction-card">
 						<div class="content">
@@ -90,7 +90,10 @@
 								<div class="left">
 									<span>Base Bid</span>
 									<h4>${formatPrice(auction.minBidPrice)}</h4>
-									<!-- <span class="usd" style="font-weight: 700"
+									<span class="usd" style="font-weight: 700"
+										>{`Token ID - [${auction.tokenId}]`}</span
+									>
+									<!-- <span class="usd" 
 												>${auction.minBidPrice.toLocaleString()}</span
 											> -->
 								</div>

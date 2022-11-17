@@ -48,22 +48,22 @@
 		console.log(approved);
 	};
 
-	const getAllowanceStatus = async (address: string, bidPrice: number) => {
+	const getAllowanceStatus = async (address: string) => {
 		// try {
 		// 	//@ts-ignore
 		// 	await evm.attachContract('mockToken', address, MockToken.abi);
 		// 	const getAll = await $contracts.mockToken.methods.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI).call();
 		// 	console.log('get allo___', getAll);
-		// 	if (getAll < bidPrice) {
-		// 		approved = false;
-		// 		closeModal();
-		// 		return;
-		// 	} else {
+		// 	if (getAll == 0) {
 		// 		approved = true;
 		// 		closeModal();
 		// 		return;
+		// 	} else {
+		// 		approved = false;
+		// 		closeModal();
+		// 		return;
 		// 	}
-		//
+		// 	// alert('Please Approve Dauction Contract');
 		// } catch (error: any) {
 		// 	approved = false;
 		// 	const msg = error.message;
@@ -74,18 +74,20 @@
 	};
 
 	onMount(async () => {
-		// if (!$currentAuction) {
-		// 	goto('/explore');
-		// }
-		// if (
-		// 	$selectedAccount &&
-		// 	!$currentAuction?.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())
-		// ) {
-		// 	goto('/explore');
-		// }
+		if (!$currentAuction) {
+			goto('/explore');
+		}
+
+		if (
+			$selectedAccount &&
+			$currentAuction?.owner.toLowerCase() !== $selectedAccount?.toLowerCase()
+		) {
+			alert('You are not the owner of auction');
+			goto('/explore');
+		}
 	});
 
-	const revealBid = async ({
+	const settleAuction = async ({
 		nftAddress,
 		tokenId,
 		bidValue,
@@ -99,10 +101,10 @@
 		console.log(nftAddress, tokenId, bidValue, salt);
 
 		try {
-			const revealBid = await $contracts.dauctionContract.methods
-				.revealBid(nftAddress, tokenId, bidValue, salt)
+			const settleAuction = await $contracts.dauctionContract.methods
+				.settleAuction(nftAddress, tokenId, bidValue, salt)
 				.send({ from: $selectedAccount });
-			console.log('reveal Bid _______', revealBid);
+			console.log('reveal Bid _______', settleAuction);
 
 			closeModal();
 			alert('Bid Revealed, Awaiting Winner');
@@ -137,7 +139,7 @@
 			return;
 		}
 
-		revealBid({
+		settleAuction({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
 			bidValue: formState.bidPrice.toString(),

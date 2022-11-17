@@ -34,7 +34,7 @@
 
 	const handleRevealBid = async (auction: any) => {
 		await currentAuction.set(auction);
-		goto(`/user/reveal-auction/${auction.tokenId}`);
+		goto(`/user/reveal-bid/${auction.tokenId}`);
 	};
 </script>
 
@@ -78,14 +78,15 @@
 										profile_pic={RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)]}
 										nft={auction.image}
 										liked={auction.liked}
+										tokenId={auction.tokenId}
 									/>
 									<div class="auction-card-bottom">
 										<div class="left">
 											<span>Base Bid</span>
 											<h4>${formatPrice(auction.minBidPrice)}</h4>
-											<!-- <span class="usd" style="font-weight: 700"
-												>${auction.minBidPrice.toLocaleString()}</span
-											> -->
+											<span class="usd" style="font-weight: 700;margin-top: 2px">
+												{`Token ID - [${auction.tokenId}]`}
+											</span>
 										</div>
 										<div class="right">
 											{#if $selectedAccount && auction.bidders
@@ -111,7 +112,18 @@
 									</div>
 									<!-- {#if datetoUnix(new Date()) < auction.endTime}  disabled={datetoUnix(new Date()) >= auction.endTime}-->
 									<div class="auction-btns">
-										{#if $selectedAccount && auction.bidders
+										{#if $selectedAccount && auction.owner.toLowerCase() === $selectedAccount.toLowerCase()}
+											<button
+												class="btn-primary auction-btn-place"
+												on:click={() => handlePlaceBid(auction)}
+												disabled={datetoUnix(new Date()) > auction.revealDuration}
+											>
+												<span>Settle Auction</span>
+											</button>
+											<button class="btn-outline-primary auction-btn-explore" style="width: 45%;">
+												<span>View</span>
+											</button>
+										{:else if $selectedAccount && auction.bidders
 												.join('')
 												.toLowerCase()
 												.includes($selectedAccount?.toLowerCase())}
@@ -124,6 +136,9 @@
 												)}
 											>
 												<span>Reveal Bid</span>
+											</button>
+											<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
+												<span>View</span>
 											</button>
 											<!--{:else if !auction.bidders
 											.join('')
@@ -144,10 +159,10 @@
 											>
 												<span>Place a Bid</span>
 											</button>
+											<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
+												<span>View</span>
+											</button>
 										{/if}
-										<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
-											<span>View</span>
-										</button>
 									</div>
 									<!-- {/if} -->
 								</div>

@@ -1,9 +1,26 @@
 <script lang="ts">
+	import { AVAILABLE_AUCTIONS } from '$lib/stores/main';
+	import { sortArrayofObjects } from '$lib/utils/otherUtils';
+
 	export let profile_name: string;
 	export let profile_desc: string;
 	export let profile_pic: string;
 	export let nft: string;
 	export let liked: boolean;
+	export let tokenId: number;
+
+	const handleLikeAuction = (tokenId: number) => {
+		let newAuction = $AVAILABLE_AUCTIONS.find((x) => x.tokenId === tokenId);
+		if (newAuction) {
+			newAuction.liked = !newAuction.liked;
+			AVAILABLE_AUCTIONS.set(
+				sortArrayofObjects(
+					[...$AVAILABLE_AUCTIONS.filter((x) => x.tokenId !== tokenId), newAuction],
+					'tokenId'
+				)
+			);
+		}
+	};
 </script>
 
 <div class="card-top-template-top">
@@ -16,9 +33,19 @@
 	</div>
 	<img src={nft} class="auction-card-image" alt="" />
 	{#if liked}
-		<img src="/icons/full-heart.svg" alt="" class="liked" on:click={() => (liked = false)} />
+		<img
+			src="/icons/full-heart.svg"
+			alt=""
+			class="liked"
+			on:click={() => handleLikeAuction(tokenId)}
+		/>
 	{:else}
-		<img src="/icons/empty-heart.svg" alt="" class="liked" on:click={() => (liked = true)} />
+		<img
+			src="/icons/empty-heart.svg"
+			alt=""
+			class="liked"
+			on:click={() => handleLikeAuction(tokenId)}
+		/>
 	{/if}
 </div>
 

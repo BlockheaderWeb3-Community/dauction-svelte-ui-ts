@@ -6,6 +6,12 @@
 	export let required = false;
 	export let value: number;
 	export let info = '';
+
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
+	const onBlur = (e: any) => {
+		dispatch('blur', e.target.value);
+	};
 </script>
 
 <fieldset>
@@ -17,7 +23,7 @@
 			{/if}
 		</label>
 	{/if}
-	<input type="number" {name} {required} bind:value />
+	<input type="number" {name} {required} bind:value on:blur={onBlur} />
 	{#if info}
 		<p>
 			<img src={svgPath('info')} alt="" width="15" />

@@ -24,7 +24,7 @@
 
 	const handleRevealBid = async (auction: any) => {
 		await currentAuction.set(auction);
-		goto(`/user/reveal-auction/${auction.tokenId}`);
+		goto(`/user/reveal-bid/${auction.tokenId}`);
 	};
 
 	/* const auction: Auction = {
@@ -87,9 +87,9 @@
 								<div class="left">
 									<span>Base Bid</span>
 									<h4>${formatPrice(auction.minBidPrice)}</h4>
-									<!-- <span class="usd" style="font-weight: 700"
-										>${auction.usd_price.toLocaleString()}</span
-									> -->
+									<span class="usd" style="font-weight: 700">
+										{`Token ID - [${auction.tokenId}]`}
+									</span>
 								</div>
 								<div class="right">
 									{#if $selectedAccount && auction.bidders
