@@ -84,6 +84,13 @@
 		// }
 	};
 
+	const getBidDetail = async (nftAddress: string, tokenID: string, bidderAddress: string) => {
+		const bidDetail = await $contracts.dauctionContract.methods
+			.getBid(nftAddress, tokenID, bidderAddress)
+			.call();
+		return bidDetail;
+	};
+
 	const getBidders = async (nftAddress: string, tokenID: string) => {
 		const biddersDetail = await $contracts.dauctionContract.methods
 			.getBidders(nftAddress, tokenID)
@@ -108,13 +115,26 @@
 			for (let i = 0; i < auctionsOnDNFT_.length; i++) {
 				let image = await getNFTImage($contracts.nftContract, auctionsOnDNFT_[i].tokenId);
 				let bidders = [];
+				let bidders_: any[] = [];
 				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
 					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
+
+					for (let j = 0; j < bidders.length; j++) {
+						const x = await getBidDetail(
+							NFT_CONTRACT_ADDRESS_ON_GOERLI,
+							auctionsOnDNFT_[j].tokenId,
+							bidders[0]
+						);
+						bidders_ = [...bidders_, { ...x, address: bidders[j] }];
+					}
+
+					// console.log('x_____', x.amountBidded);
 				}
 				let newAuction = await {
 					...auctionsOnDNFT_[i],
 					image: image,
 					bidders: bidders,
+					bidders_: bidders_,
 					liked: false
 				};
 				auctionsOnDNFT = await [...auctionsOnDNFT, newAuction];

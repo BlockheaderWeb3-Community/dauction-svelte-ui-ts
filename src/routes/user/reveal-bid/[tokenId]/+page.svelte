@@ -62,15 +62,15 @@
 	// 	console.log(approved);
 	// };
 
-	const setAllowance = async (address: string, bidPrice: number) => {
+	const setAllowance = async (contractAddress: string, bidPrice: number) => {
 		openModal(LoadingModal);
-		if (!address || !bidPrice) {
+		if (!contractAddress || !bidPrice) {
 			closeModal();
 			return;
 		}
 		try {
 			//@ts-ignore
-			await evm.attachContract('mockToken', address, MockToken.abi);
+			await evm.attachContract('mockToken', contractAddress, MockToken.abi);
 
 			const newPrice = ethers.BigNumber.from(toWei(bidPrice));
 			const setAll = await $contracts.mockToken.methods
@@ -129,7 +129,7 @@
 	}: {
 		nftAddress: string;
 		tokenId: string;
-		bidValue: string;
+		bidValue: any;
 		salt: string;
 	}) => {
 		console.log(nftAddress, tokenId, bidValue, salt);
@@ -147,6 +147,7 @@
 			// 	infoText: `Write down your salt -  ${salt}`
 			// });
 			currentAuction.set(null);
+			goto('/explore');
 		} catch (error: any) {
 			console.log(error);
 			const msg = error.message;
@@ -173,10 +174,12 @@
 			return;
 		}
 
+		const newPrice = ethers.BigNumber.from(toWei(formState.bidPrice.toString()));
+
 		revealBid({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
-			bidValue: formState.bidPrice.toString(),
+			bidValue: newPrice,
 			salt: formState.salt
 		});
 	};
@@ -198,7 +201,7 @@
 			/>
 			<!-- <TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} /> -->
 			<NumberInput
-				label="Bid Price ($)"
+				label="Bid Price (amount of bid tokens)"
 				name="baseBid"
 				required={true}
 				bind:value={formState.bidPrice}
@@ -227,7 +230,7 @@
 				<button
 					type="button"
 					class="btn-outline-primary"
-					on:click={() => setAllowance(formState.nftContractAddress, formState.bidPrice)}
+					on:click={() => setAllowance(formState.currencyAddress, formState.bidPrice)}
 					disabled={approved}
 				>
 					<span>Grant Approval</span>

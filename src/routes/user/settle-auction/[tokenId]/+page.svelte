@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let data: any;
 	import {
 		connected,
 		chainId,
@@ -23,29 +24,17 @@
 	import { openModal, closeModal, closeAllModals } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
-	import { currentAuction } from '$lib/stores/main';
+	import { currentAuction, NEW_AUCTION_CHANGES } from '$lib/stores/main';
 	import { goto } from '$app/navigation';
 	import { createSalt, hashCommitmentParams, theRandomNumber } from '$lib/utils/hexUtils';
 	import InfoModal from '$lib/components/modals/InfoModal.svelte';
 	import TextAreaInput from '$lib/components/reusables/TextAreaInput.svelte';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
+	import { successToast } from '$lib/components/toast/toastTheme';
 
 	let formState = {
 		nftContractAddress: '',
-		tokenId: '',
-		bidPrice: 0,
-		salt: '',
-		currencyAddress: ''
-	};
-
-	let approved = false;
-
-	const checkAllowance = async (address: string) => {
-		approved = false;
-		// if (!tokenId) return;
-		// openModal(LoadingModal);
-		// getApprovalStatus(tokenId);
-		console.log(approved);
+		tokenId: `${data.tokenId}`
 	};
 
 	const getAllowanceStatus = async (address: string) => {
@@ -89,30 +78,24 @@
 
 	const settleAuction = async ({
 		nftAddress,
-		tokenId,
-		bidValue,
-		salt
+		tokenId
 	}: {
 		nftAddress: string;
 		tokenId: string;
-		bidValue: string;
-		salt: string;
 	}) => {
-		console.log(nftAddress, tokenId, bidValue, salt);
+		console.log(nftAddress, tokenId);
 
 		try {
 			const settleAuction = await $contracts.dauctionContract.methods
-				.settleAuction(nftAddress, tokenId, bidValue, salt)
+				.settleAuction(nftAddress, tokenId)
 				.send({ from: $selectedAccount });
-			console.log('reveal Bid _______', settleAuction);
+			console.log('settle Auction _______', settleAuction);
 
 			closeModal();
-			alert('Bid Revealed, Awaiting Winner');
-			// openModal(InfoModal, {
-			// 	infoTitle: `Bid Reveal`,
-			// 	infoText: `Write down your salt -  ${salt}`
-			// });
+			successToast('Auction Settled');
 			currentAuction.set(null);
+			NEW_AUCTION_CHANGES.set(true);
+			goto('/explore');
 		} catch (error: any) {
 			console.log(error);
 			const msg = error.message;
@@ -133,27 +116,22 @@
 			}
 		}
 
-		if ($selectedAccount?.toLowerCase() === $currentAuction?.owner.toLowerCase()) {
+		if ($selectedAccount?.toLowerCase() !== $currentAuction?.owner.toLowerCase()) {
 			closeModal();
-			alert('Auctioneer cannot reveal bid');
+			alert('Bidder cannot settle auction');
 			return;
 		}
 
 		settleAuction({
 			nftAddress: formState.nftContractAddress,
-			tokenId: formState.tokenId,
-			bidValue: formState.bidPrice.toString(),
-			salt: formState.salt
+			tokenId: formState.tokenId
 		});
 	};
 </script>
 
 <div class="reveal-bid">
 	<h1 class="title">Settle Auction</h1>
-	{#if $selectedAccount && $currentAuction?.bidders
-			.join('')
-			.toLowerCase()
-			.includes($selectedAccount?.toLowerCase())}
+	{#if $selectedAccount && $currentAuction?.owner.toLowerCase() === $selectedAccount?.toLowerCase()}
 		<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
 			<TextInput
 				label="NFT Contract Address"
@@ -161,33 +139,13 @@
 				required={true}
 				bind:value={formState.nftContractAddress}
 			/>
-			<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
-			<NumberInput
-				label="Bid Price ($)"
-				name="baseBid"
-				required={true}
-				bind:value={formState.bidPrice}
-			/>
-			<CurrencySelector
-				data={CURRENCIES}
-				label="Choose Currency"
-				name="currencyAddress"
-				required={true}
-				bind:value={formState.currencyAddress}
-			/>
-			<TextAreaInput
-				label="Token Id"
-				name="tokenId"
-				required={true}
-				bind:value={formState.tokenId}
-			/>
 
 			<div class="cta">
 				<button type="submit" class="btn-primary submit">
-					<span>Reveal Bid</span>
+					<span>Settle Auction</span>
 				</button>
 				<button type="button" class="btn-outline-primary" on:click={() => goto('/explore')}>
-					<span>Grant Approval</span>
+					<span>Go Back</span>
 				</button>
 			</div>
 		</form>

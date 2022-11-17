@@ -9,6 +9,7 @@
 	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
 	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
 	import { sortArrayofObjects } from '$lib/utils/otherUtils';
+	import { goto } from '$app/navigation';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
@@ -45,6 +46,11 @@
 	// 	}
 	// ];
 	*/
+
+	const handleSettleAuction = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/settle-auction/${auction.tokenId}`);
+	};
 </script>
 
 <div
@@ -107,8 +113,12 @@
 							</div>
 							<div class="auction-btns">
 								{#if datetoUnix(new Date()) > auction.revealDuration}
-									<button class="btn-outline-primary auction-btn-explore" style="width: 100%;">
-										<span>Settle Bid</span>
+									<button
+										class="btn-outline-primary auction-btn-explore"
+										style="width: 100%;"
+										on:click={() => handleSettleAuction(auction)}
+									>
+										<span>Settle Auciton</span>
 									</button>
 								{:else}
 									<button class="btn-outline-primary auction-btn-explore" style="width: 100%;">

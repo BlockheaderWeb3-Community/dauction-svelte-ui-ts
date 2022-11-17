@@ -24,7 +24,9 @@
 	import { toast } from '@zerodevx/svelte-toast';
 	import { errorToast, successToast } from '$lib/components/toast/toastTheme';
 
-	onMount(() => {});
+	onMount(() => {
+		console.log($AVAILABLE_AUCTIONS[0]?.bidders_);
+	});
 
 	$: if ($AVAILABLE_AUCTIONS.length > 0) {
 		// errorToast('It works!');
@@ -101,11 +103,21 @@
 											</span>
 										</div>
 										<div class="right">
-											{#if $selectedAccount && auction.bidders
+											{#if datetoUnix(new Date()) < auction.startTime}
+												<span>Time before bid starts</span>
+												<h4>
+													<CountdownTimer endTime={unixToDate(auction.startDate)} />
+												</h4>
+											{:else if $selectedAccount && auction.bidders
 													.join('')
 													.toLowerCase()
 													.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
 												<span>Time left to reveal</span>
+												<h4>
+													<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
+												</h4>
+											{:else if $selectedAccount && auction.owner.toLowerCase() === $selectedAccount?.toLowerCase() && datetoUnix(new Date()) > auction.endTime}
+												<span>Time left to Settle</span>
 												<h4>
 													<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
 												</h4>
@@ -167,7 +179,8 @@
 											<button
 												class="btn-primary auction-btn-place"
 												on:click={() => handlePlaceBid(auction)}
-												disabled={datetoUnix(new Date()) >= auction.endTime}
+												disabled={datetoUnix(new Date()) > auction.endTime ||
+													datetoUnix(new Date()) < auction.startTime}
 											>
 												<span>Place a Bid</span>
 											</button>

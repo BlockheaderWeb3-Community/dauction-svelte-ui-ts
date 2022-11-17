@@ -146,7 +146,7 @@
 				bind:value={formState.tokenId}
 			/> -->
 			<NumberInput
-				label="Bid Price ($)"
+				label="Bid Price (amount of bid tokens)"
 				name="baseBid"
 				required={true}
 				bind:value={formState.bidPrice}

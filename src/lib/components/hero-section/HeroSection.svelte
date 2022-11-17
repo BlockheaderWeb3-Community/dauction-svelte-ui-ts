@@ -15,7 +15,10 @@
 						<span>Explore</span>
 						<img src="/icons/arrow-forward-black.svg" alt="" />
 					</button>
-					<button class="btn-outline-primary hero-btn-create-auction">
+					<button
+						class="btn-outline-primary hero-btn-create-auction"
+						on:click={() => goto('/user/create-auction')}
+					>
 						<span>Create Auction</span>
 					</button>
 				</div>

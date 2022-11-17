@@ -14,6 +14,7 @@
 	import TextInput from '$lib/components/reusables/TextInput.svelte';
 	import TimeInput from '$lib/components/reusables/TimeInput.svelte';
 	import DateInput from '$lib/components/reusables/DateInput.svelte';
+	import { ethers } from 'ethers';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
 	import {
 		CURRENCIES,
@@ -28,6 +29,7 @@
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
 	import { goto } from '$app/navigation';
+	import { NEW_AUCTION_CHANGES } from '$lib/stores/main';
 
 	let formState = {
 		nftContractAddress: '',
@@ -123,6 +125,7 @@
 			// alert(`Take Note Of Your hashCommitment`);
 			closeModal();
 			alert(`Auction Created`);
+			NEW_AUCTION_CHANGES.set(true);
 			goto('/explore');
 		} catch (error: any) {
 			console.log(error);
@@ -153,7 +156,7 @@
 		const finalEndTime =
 			datetoUnix(combineDateTime(formState.endDate, formState.endTime)) + minsToUnix(DELAY_MINUTES); // Add 3mins for delays
 		const finalRevealDuration = finalEndTime + minsToUnix(formState.revealDuration);
-		const baseBidToWei = toWei(formState.baseBid);
+		const baseBidToWei = ethers.BigNumber.from(toWei(formState.baseBid));
 
 		createAuction({
 			nftAddress: formState.nftContractAddress,
@@ -271,6 +274,4 @@
 	.create-auction form .cta button {
 		width: 50%;
 	}
-
-	
 </style>

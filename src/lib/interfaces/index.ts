@@ -1,6 +1,7 @@
 export interface Auction {
 	auctionStatus: string;
 	bidders: string[];
+	bidders_?: any[];
 	endTime: number;
 	image: string;
 	minBidPrice: string;
@@ -10,7 +11,6 @@ export interface Auction {
 	tokenId: number;
 	liked: boolean;
 }
-
 
 export interface AuctionDummy {
 	id: number;
