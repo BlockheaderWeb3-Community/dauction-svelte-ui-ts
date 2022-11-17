@@ -55,13 +55,15 @@
 		tokenId,
 		bidCommitment,
 		bidToken,
-		salt
+		salt,
+		saltRandomNumber
 	}: {
 		nftAddress: string;
 		tokenId: string;
 		bidCommitment: string;
 		bidToken: string;
 		salt: string;
+		saltRandomNumber: number;
 	}) => {
 		console.log(nftAddress, tokenId, bidCommitment, bidToken, salt);
 
@@ -74,7 +76,7 @@
 			closeModal();
 			openModal(InfoModal, {
 				infoTitle: `Bid Placed`,
-				infoText: `Write down your salt -  ${salt}`
+				infoText: `Write down your salt key -  ${saltRandomNumber}`
 			});
 			// currentAuction.set(null);
 		} catch (error: any) {
@@ -107,8 +109,8 @@
 		// 	alert('Bid cannot be less than base bid');
 		// 	return;
 		// }
-
-		const salt = createSalt(theRandomNumber);
+		const saltRandomNumber = theRandomNumber;
+		const salt = createSalt(saltRandomNumber);
 		const newPrice = ethers.BigNumber.from(toWei(formState.bidPrice));
 		console.log('new PRice', newPrice);
 		const bidCommitment = hashCommitmentParams(newPrice, salt);
@@ -118,7 +120,8 @@
 			tokenId: formState.tokenId,
 			bidCommitment: bidCommitment,
 			bidToken: formState.currencyAddress,
-			salt: salt
+			salt: salt,
+			saltRandomNumber: saltRandomNumber
 		});
 	};
 </script>

@@ -36,7 +36,7 @@
 		nftContractAddress: '',
 		tokenId: `${data.tokenId}`,
 		bidPrice: 0,
-		salt: '',
+		saltRandomNumber: '',
 		currencyAddress: ''
 	};
 
@@ -175,12 +175,12 @@
 		}
 
 		const newPrice = ethers.BigNumber.from(toWei(formState.bidPrice.toString()));
-
+		const salt = createSalt(formState.saltRandomNumber);
 		revealBid({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
 			bidValue: newPrice,
-			salt: formState.salt
+			salt: salt
 		});
 	};
 </script>
@@ -215,7 +215,12 @@
 				bind:value={formState.currencyAddress}
 				on:change={() => getAllowanceStatus(formState.currencyAddress, formState.bidPrice)}
 			/>
-			<TextInput label="Salt From Bid" name="salt" required={true} bind:value={formState.salt} />
+			<TextInput
+				label="Salt Key From Bid"
+				name="salt"
+				required={true}
+				bind:value={formState.saltRandomNumber}
+			/>
 			<!-- <TextAreaInput
 				label="Token Id"
 				name="tokenId"
