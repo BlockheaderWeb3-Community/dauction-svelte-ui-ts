@@ -2,6 +2,20 @@
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
 	import type { Auction } from '$lib/interfaces';
 	import { onMount } from 'svelte';
+	import { AVAILABLE_AUCTIONS } from '$lib/stores/main';
+	import { RANDOM_PROFILE } from '$lib/utils/constants';
+	import { formatPrice } from '$lib/utils/conversionUtils';
+	import {
+		connected,
+		chainId,
+		selectedAccount,
+		defaultEvmStores as evm,
+		web3,
+		//@ts-ignore
+		contracts
+	} from 'svelte-web3';
+	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
+	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
@@ -39,7 +53,7 @@
 </script>
 
 <div bind:this={drawerContent} class="biddings user-template" style="width: 100%;height: 100%">
-	{#if auctions.length > 0}
+	{#if $AVAILABLE_AUCTIONS.length > 0}
 		<div class="top">
 			<div class="toolbar">
 				<div class="search-container">
@@ -52,29 +66,48 @@
 			</div>
 		</div>
 		<div class="auctions-container">
-			{#each auctions as auction}
+			{#each $AVAILABLE_AUCTIONS.filter((x) => $selectedAccount && x.bidders
+						.join('')
+						.toLowerCase()
+						.includes($selectedAccount?.toLowerCase())) as auction}
 				<div class="auction">
 					<div class="auction-card">
 						<div class="content">
 							<CardTopTemplate
-								profile_name={auction.profile_name}
-								profile_desc={auction.profile_desc}
-								profile_pic={auction.profile_pic}
-								nft={auction.nft}
-								liked={auction.liked}
+								profile_name={'auction.profile_name'}
+								profile_desc={'auction.profile_desc'}
+								profile_pic={RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)]}
+								nft={auction.image}
+								liked={false}
 							/>
 							<div class="auction-card-bottom">
 								<div class="left">
 									<span>Base Bid</span>
-									<h4>{auction.crypto_price.toLocaleString()}<span>MATIC</span></h4>
-									<span class="usd" style="font-weight: 700"
-										>${auction.usd_price.toLocaleString()}</span
-									>
+									<h4>${formatPrice(auction.minBidPrice)}</h4>
+									<!-- <span class="usd" style="font-weight: 700"
+												>${auction.minBidPrice.toLocaleString()}</span
+											> -->
 								</div>
 								<div class="right">
-									<span>Remaning Time</span>
-									<h4>09h 24m 02s</h4>
-									<p><span class="usd">{auction.bids}</span>bids placed</p>
+									{#if $selectedAccount && auction.bidders
+											.join('')
+											.toLowerCase()
+											.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
+										<span>Time left to reveal</span>
+										<h4>
+											<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
+										</h4>
+									{:else}
+										<span>Remaning Time</span>
+										<h4>
+											<CountdownTimer endTime={unixToDate(auction.endTime)} />
+										</h4>
+									{/if}
+									<p>
+										<span class="usd">{auction.bidders.length}</span>{`${
+											auction.bidders.length > 1 ? 'bids' : 'bid'
+										} placed`}
+									</p>
 								</div>
 							</div>
 							<div class="auction-btns">

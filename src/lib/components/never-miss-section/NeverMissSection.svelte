@@ -1,5 +1,5 @@
 <div class="never-miss-section">
-	<h1>Never miss out on a listing</h1>
+	<h1>Never miss out on an auction</h1>
 	<p>
 		Subscribe to our exclusive list and get a notification immediately an asset is listed up for
 		auction

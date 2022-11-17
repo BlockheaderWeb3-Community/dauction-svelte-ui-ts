@@ -95,7 +95,7 @@
 			}
 		}
 
-		if ($selectedAccount?.toLowerCase() === $currentAuction.owner.toLowerCase()) {
+		if ($selectedAccount?.toLowerCase() === $currentAuction?.owner.toLowerCase()) {
 			closeModal();
 			alert('Auctioneer cannot place bid');
 			return;
@@ -125,10 +125,10 @@
 	<h1 class="title">Create Bid</h1>
 	{#if $currentAuction?.owner?.toLowerCase() === $selectedAccount?.toLowerCase()}
 		<h1>You Cant Bid on Your Own Auction</h1>
-	{:else if !$currentAuction?.bidders
-		.join('')
-		.toLowerCase()
-		.includes($selectedAccount?.toLowerCase())}
+	{:else if $selectedAccount && !$currentAuction?.bidders
+			.join('')
+			.toLowerCase()
+			.includes($selectedAccount?.toLowerCase())}
 		<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
 			<TextInput
 				label="NFT Contract Address"

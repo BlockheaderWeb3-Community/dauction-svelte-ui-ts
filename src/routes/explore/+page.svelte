@@ -12,113 +12,20 @@
 
 	import { openModal, closeModal } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
-	import { NFT_CONTRACT_ADDRESS_ON_GOERLI } from '$lib/utils/constants';
+	import { NFT_CONTRACT_ADDRESS_ON_GOERLI, RANDOM_PROFILE } from '$lib/utils/constants';
 	import ExploreCardTopTemplate from '$lib/components/ExploreCardTopTemplate.svelte';
 	import { goto } from '$app/navigation';
 	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
 	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
-	import { currentAuction } from '$lib/stores/main';
+	import { AVAILABLE_AUCTIONS, currentAuction } from '$lib/stores/main';
 	import { formatPrice, fromWei } from '$lib/utils/conversionUtils';
-
-	let auctionsOnDNFT: any[] = [];
-	let auctionsOnDNFT_: any[] = [];
-	let totalMinted = 0;
-
-	const RANDOM_PROFILE = [
-		'/images/profile-images/Strange-Connections.png',
-		'/images/profile-images/Blockheader-Digital-Assets.png',
-		'/images/profile-images/GardenLockdown.png'
-	];
+	import { arrayIsNotEqual } from '$lib/utils/otherUtils';
 
 	onMount(() => {});
-
-	const getTotalMintedNFTs = async () => {
-		totalMinted = await $contracts.nftContract.methods.totalMinted().call();
-		console.log('total mint _______', totalMinted);
-		return;
-	};
-
-	const populateAuctions = async () => {
-		try {
-			openModal(LoadingModal);
-			await getTotalMintedNFTs();
-			for (let i = 0; i < totalMinted; i++) {
-				let auction = await getAuctionDetails(NFT_CONTRACT_ADDRESS_ON_GOERLI, `${i}`);
-				if (auction.owner !== '0x0000000000000000000000000000000000000000') {
-					auctionsOnDNFT_ = [...auctionsOnDNFT_, { tokenId: i, ...auction }];
-				}
-			}
-
-			// get images
-			// auctionsOnDNFT_ = await auctionsOnDNFT_.map(async (auction) => {
-			// 	let image = await getNFTImage($contracts.nftContract, auction.tokenId);
-			// 	let newAuction = await { ...auction, image: image };
-			// 	return newAuction;
-			// });
-			for (let i = 0; i < auctionsOnDNFT_.length; i++) {
-				let image = await getNFTImage($contracts.nftContract, auctionsOnDNFT_[i].tokenId);
-				let bidders = [];
-				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
-					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
-				}
-				let newAuction = await { ...auctionsOnDNFT_[i], image: image, bidders: bidders };
-				auctionsOnDNFT = [...auctionsOnDNFT, newAuction];
-			}
-
-			console.log(auctionsOnDNFT);
-
-			closeModal();
-		} catch (error: any) {
-			const msg = error.message;
-			alert(msg.split('{')[0]);
-			closeModal();
-			return;
-		}
-	};
 
 	$: if ($connected) {
 		// getNFTImage($contracts);
 	}
-
-	$: if ($connected && $selectedAccount !== null) {
-		populateAuctions();
-	}
-
-	const getNFTImage = async (nftContract: any, tokenID: string) => {
-		if (!$connected) {
-			return;
-		}
-		const nftJSONURL = await nftContract?.methods.tokenURI(tokenID).call();
-		try {
-			const response = await fetch(nftJSONURL);
-			const cResponse = await response.json();
-			return cResponse.image;
-		} catch (error) {
-			console.log(error);
-			return '';
-		}
-	};
-
-	const getAuctionDetails = async (nftAddress: string, tokenID: string) => {
-		const auctionDetail = await $contracts.dauctionContract.methods
-			.auctions(nftAddress, tokenID)
-			.call();
-		return auctionDetail;
-		// try {
-		// 	const response = await fetch(nftJSONURL);
-		// 	const cResponse = await response.json();
-		// 	return cResponse.image;
-		// } catch (error) {
-		// 	console.log(error);
-		// 	return '';
-		// }
-	};
-	const getBidders = async (nftAddress: string, tokenID: string) => {
-		const biddersDetail = await $contracts.dauctionContract.methods
-			.getBidders(nftAddress, tokenID)
-			.call();
-		return biddersDetail;
-	};
 
 	const handlePlaceBid = async (auction: any) => {
 		await currentAuction.set(auction);
@@ -161,7 +68,7 @@
 
 			<div class="explore">
 				<div class="auctions-container">
-					{#each auctionsOnDNFT as auction}
+					{#each $AVAILABLE_AUCTIONS as auction}
 						<div class="auction">
 							<div class="auction-card">
 								<div class="content">
@@ -181,10 +88,10 @@
 											> -->
 										</div>
 										<div class="right">
-											{#if auction.bidders
-												.join('')
-												.toLowerCase()
-												.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
+											{#if $selectedAccount && auction.bidders
+													.join('')
+													.toLowerCase()
+													.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
 												<span>Time left to reveal</span>
 												<h4>
 													<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
@@ -204,10 +111,10 @@
 									</div>
 									<!-- {#if datetoUnix(new Date()) < auction.endTime}  disabled={datetoUnix(new Date()) >= auction.endTime}-->
 									<div class="auction-btns">
-										{#if auction.bidders
-											.join('')
-											.toLowerCase()
-											.includes($selectedAccount?.toLowerCase())}
+										{#if $selectedAccount && auction.bidders
+												.join('')
+												.toLowerCase()
+												.includes($selectedAccount?.toLowerCase())}
 											<button
 												class="btn-primary auction-btn-place"
 												on:click={() => handleRevealBid(auction)}
@@ -215,6 +122,17 @@
 											>
 												<span>Reveal Bid</span>
 											</button>
+											<!--{:else if !auction.bidders
+											.join('')
+											.toLowerCase()
+											.includes($selectedAccount?.toLowerCase())}
+											 <button
+											class="btn-primary auction-btn-place"
+											on:click={() => handlePlaceBid(auction)}
+											disabled={datetoUnix(new Date()) >= auction.endTime}
+										>
+											<span>Place a Bid</span>
+										</button> -->
 										{:else}
 											<button
 												class="btn-primary auction-btn-place"

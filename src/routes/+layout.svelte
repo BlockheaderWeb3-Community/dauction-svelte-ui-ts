@@ -3,10 +3,10 @@
 	import Footer from '$lib/components/footer/Footer.svelte';
 	import './styles.css';
 
-	import { Modals, closeModal } from 'svelte-modals';
+	import { Modals, closeModal, openModal } from 'svelte-modals';
 
 	import { onMount } from 'svelte';
-	import { web3Modal } from '$lib/stores/main';
+	import { AVAILABLE_AUCTIONS, web3Modal } from '$lib/stores/main';
 	import { ethers } from 'ethers';
 
 	import Dauction from '$lib/contracts/Dauction.json';
@@ -16,6 +16,7 @@
 	//@ts-ignore
 	// import NFT from '$lib/contracts/NFT.json';
 
+	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import {
 		connected,
 		chainData,
@@ -35,32 +36,103 @@
 		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
 		NFT_CONTRACT_ADDRESS_ON_GOERLI
 	} from '$lib/utils/constants';
-
-	// const MOCK_USDT_ADDRESS_ON_MUMBAI = '0x8a103012233e0885285C571ef8C627C3d65408c0';
-
-	// const NFT_ADDRESS_ON_GOERLI = '0xFc5981357a457A39CC246fB7ce4b7093b348978b';
+	import { arrayIsNotEqual } from '$lib/utils/otherUtils';
 
 	//@ts-ignore
 	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, Dauction.abi);
 	//@ts-ignore
 	evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_GOERLI, NFTContract.abi);
-	//@ts-ignore
-	// evm.attachContract('mockUSDTConract', MOCK_USDT_ADDRESS_ON_MUMBAI, MockUSDT.abi);
 
-	// const nftContractInstance = (contractAddress) => {
-	// 	//@ts-ignore
-	// 	return evm.attachContract('nftContract', contractAddress, ERC721.abi);
-	// };
+	let auctionsOnDNFT: any[] = [];
+	let auctionsOnDNFT_: any[] = [];
+	let totalMinted = 0;
 
-	//@ts-ignore
-	// evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_MUMBAI, NFTContract.abi);
+	const getTotalMintedNFTs = async () => {
+		totalMinted = await $contracts.nftContract.methods.totalMinted().call();
+		console.log('total mint _______', totalMinted);
+		return;
+	};
 
-	//@ts-ignore
-	// evm.attachContract('nftContractz', NFT_ADDRESS_ON_GOERLI, NFT);
+	const getNFTImage = async (nftContract: any, tokenID: string) => {
+		if (!$connected) {
+			return;
+		}
+		const nftJSONURL = await nftContract?.methods.tokenURI(tokenID).call();
+		try {
+			const response = await fetch(nftJSONURL);
+			const cResponse = await response.json();
+			return cResponse.image;
+		} catch (error) {
+			console.log(error);
+			return '';
+		}
+	};
 
-	// const dauctionContract = new Web3();
-	// const dauctionContract = makeContractStore(Dauction, DAUCTION_ADDRESS_ON_GOERLI);
-	$: console.log($contracts);
+	const getAuctionDetails = async (nftAddress: string, tokenID: string) => {
+		const auctionDetail = await $contracts.dauctionContract.methods
+			.auctions(nftAddress, tokenID)
+			.call();
+		return auctionDetail;
+		// try {
+		// 	const response = await fetch(nftJSONURL);
+		// 	const cResponse = await response.json();
+		// 	return cResponse.image;
+		// } catch (error) {
+		// 	console.log(error);
+		// 	return '';
+		// }
+	};
+
+	const getBidders = async (nftAddress: string, tokenID: string) => {
+		const biddersDetail = await $contracts.dauctionContract.methods
+			.getBidders(nftAddress, tokenID)
+			.call();
+		return biddersDetail;
+	};
+
+	const populateAuctions = async () => {
+		auctionsOnDNFT_ = [];
+		auctionsOnDNFT = [];
+		// AVAILABLE_AUCTIONS.set([]);
+		try {
+			openModal(LoadingModal);
+			await getTotalMintedNFTs();
+			for (let i = 0; i < totalMinted; i++) {
+				let auction = await getAuctionDetails(NFT_CONTRACT_ADDRESS_ON_GOERLI, `${i}`);
+				if (auction.owner !== '0x0000000000000000000000000000000000000000') {
+					auctionsOnDNFT_ = [...auctionsOnDNFT_, { tokenId: i, ...auction }];
+				}
+			}
+
+			for (let i = 0; i < auctionsOnDNFT_.length; i++) {
+				let image = await getNFTImage($contracts.nftContract, auctionsOnDNFT_[i].tokenId);
+				let bidders = [];
+				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
+					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
+				}
+				let newAuction = await { ...auctionsOnDNFT_[i], image: image, bidders: bidders };
+				auctionsOnDNFT = [...auctionsOnDNFT, newAuction];
+			}
+
+			console.log(auctionsOnDNFT);
+			if (arrayIsNotEqual($AVAILABLE_AUCTIONS, auctionsOnDNFT)) {
+				AVAILABLE_AUCTIONS.set(auctionsOnDNFT);
+			}
+
+			closeModal();
+		} catch (error: any) {
+			const msg = error.message;
+			alert(msg.split('{')[0]);
+			closeModal();
+			return;
+		}
+	};
+
+	$: if ($connected && $selectedAccount !== null) {
+		populateAuctions();
+	}
+
+	$: console.log($AVAILABLE_AUCTIONS.length);
 
 	// TODO: move to store
 

@@ -78,7 +78,10 @@
 			goto('/explore');
 		}
 
-		if (!$currentAuction.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())) {
+		if (
+			$selectedAccount &&
+			!$currentAuction?.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())
+		) {
 			goto('/explore');
 		}
 	});
@@ -129,7 +132,7 @@
 			}
 		}
 
-		if ($selectedAccount?.toLowerCase() === $currentAuction.owner.toLowerCase()) {
+		if ($selectedAccount?.toLowerCase() === $currentAuction?.owner.toLowerCase()) {
 			closeModal();
 			alert('Auctioneer cannot reveal bid');
 			return;
@@ -146,7 +149,10 @@
 
 <div class="reveal-bid">
 	<h1 class="title">Reveal Bid</h1>
-	{#if $currentAuction.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())}
+	{#if $selectedAccount && $currentAuction?.bidders
+			.join('')
+			.toLowerCase()
+			.includes($selectedAccount?.toLowerCase())}
 		<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
 			<TextInput
 				label="NFT Contract Address"
@@ -160,7 +166,6 @@
 				name="baseBid"
 				required={true}
 				bind:value={formState.bidPrice}
-				info={`Base bid - $${$currentAuction && fromWei($currentAuction.minBidPrice)}`}
 			/>
 			<CurrencySelector
 				data={CURRENCIES}

@@ -25,3 +25,9 @@ export const DELAY_MINUTES = 3;
 
 export const DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI = '0x67fd942138ea7d117971944b88d8d80b08c9d2e9';
 export const NFT_CONTRACT_ADDRESS_ON_GOERLI = '0x17d76D5776505eD9F60030eb8744B88A96ff9e84';
+
+export const RANDOM_PROFILE = [
+	'/images/profile-images/Strange-Connections.png',
+	'/images/profile-images/Blockheader-Digital-Assets.png',
+	'/images/profile-images/GardenLockdown.png'
+];
