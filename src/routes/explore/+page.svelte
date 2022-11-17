@@ -25,7 +25,7 @@
 	import { errorToast, successToast } from '$lib/components/toast/toastTheme';
 
 	onMount(() => {
-		console.log($AVAILABLE_AUCTIONS[0]?.bidders_);
+		// console.log($AVAILABLE_AUCTIONS[0]?.bidders_);
 	});
 
 	$: if ($AVAILABLE_AUCTIONS.length > 0) {
