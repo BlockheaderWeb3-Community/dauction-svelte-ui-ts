@@ -272,11 +272,5 @@
 		width: 50%;
 	}
 
-	.create-auction form .cta button:disabled,
-	.create-auction form .cta button[disabled] {
-		border: 1px solid #999999;
-		background-color: #cccccc;
-		color: #666666;
-		cursor: not-allowed;
-	}
+	
 </style>

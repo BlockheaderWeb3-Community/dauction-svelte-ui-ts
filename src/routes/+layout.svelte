@@ -4,6 +4,7 @@
 	import './styles.css';
 
 	import { Modals, closeModal, openModal } from 'svelte-modals';
+	import { SvelteToast } from '@zerodevx/svelte-toast';
 
 	import { onMount } from 'svelte';
 	import { AVAILABLE_AUCTIONS, web3Modal, NEW_AUCTION_CHANGES } from '$lib/stores/main';
@@ -201,6 +202,10 @@
 	// $: console.log('cache', web3Modal?.cacheProvider);
 </script>
 
+<div class="wrap">
+	<SvelteToast />
+</div>
+
 <Modals>
 	<div slot="backdrop" class="backdrop" on:click={closeModal} />
 </Modals>
@@ -231,5 +236,17 @@
 	:global(.modal .contents) {
 		z-index: 9999;
 		background: rgba(255, 255, 255, 0.3) !important;
+	}
+
+	.wrap {
+		display: contents;
+		font-size: 20px !important;
+		font-weight: 600 !important;
+		font-family: 'Darker Grotesque', sans-serif;
+		/* You can set CSS vars here too */
+		/* --toastBackground: pink; */
+	}
+	.wrap :global(strong) {
+		font-weight: 600 !important;
 	}
 </style>

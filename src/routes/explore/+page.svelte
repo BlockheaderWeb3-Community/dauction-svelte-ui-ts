@@ -21,7 +21,14 @@
 	import { formatPrice, fromWei } from '$lib/utils/conversionUtils';
 	import { arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
 
+	import { toast } from '@zerodevx/svelte-toast';
+	import { errorToast, successToast } from '$lib/components/toast/toastTheme';
+
 	onMount(() => {});
+
+	$: if ($AVAILABLE_AUCTIONS.length > 0) {
+		// errorToast('It works!');
+	}
 
 	$: if ($connected) {
 		// getNFTImage($contracts);
@@ -30,6 +37,11 @@
 	const handlePlaceBid = async (auction: any) => {
 		await currentAuction.set(auction);
 		goto(`/user/bid-auction/${auction.tokenId}`);
+	};
+
+	const handleSettleAuction = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/settle-auction/${auction.tokenId}`);
 	};
 
 	const handleRevealBid = async (auction: any) => {
@@ -115,7 +127,7 @@
 										{#if $selectedAccount && auction.owner.toLowerCase() === $selectedAccount.toLowerCase()}
 											<button
 												class="btn-primary auction-btn-place"
-												on:click={() => handlePlaceBid(auction)}
+												on:click={() => handleSettleAuction(auction)}
 												disabled={datetoUnix(new Date()) < auction.revealDuration}
 											>
 												<span>Settle Auction</span>

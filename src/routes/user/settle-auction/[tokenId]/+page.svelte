@@ -149,7 +149,7 @@
 </script>
 
 <div class="reveal-bid">
-	<h1 class="title">Reveal Bid</h1>
+	<h1 class="title">Settle Auction</h1>
 	{#if $selectedAccount && $currentAuction?.bidders
 			.join('')
 			.toLowerCase()

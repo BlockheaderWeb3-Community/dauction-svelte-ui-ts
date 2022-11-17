@@ -13,7 +13,7 @@
 
 {#if $connected && $selectedAccount !== null}
 	<div class="main">
-		{#if $page.url.pathname.includes('create-auction') || $page.url.pathname.includes('bid-auction') || $page.url.pathname.includes('reveal-auction')}
+		{#if $page.url.pathname.includes('create-auction') || $page.url.pathname.includes('bid-auction') || $page.url.pathname.includes('reveal-bid') || $page.url.pathname.includes('settle-auction')}
 			<slot />
 		{:else}
 			<UserHeader account={$selectedAccount} />

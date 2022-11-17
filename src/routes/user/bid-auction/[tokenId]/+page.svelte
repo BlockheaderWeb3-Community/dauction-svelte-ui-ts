@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let data;
 	import {
 		connected,
 		chainId,
@@ -33,7 +34,7 @@
 
 	let formState = {
 		nftContractAddress: '',
-		tokenId: '',
+		tokenId: `${data.tokenId}`,
 		bidPrice: 0,
 		currencyAddress: ''
 	};
@@ -44,7 +45,6 @@
 			return;
 		}
 
-		formState.tokenId = `${$currentAuction.tokenId}`;
 		// if (datetoUnix(new Date()) >= $currentAuction.endTime) {
 		// 	goto('/explore');
 		// }

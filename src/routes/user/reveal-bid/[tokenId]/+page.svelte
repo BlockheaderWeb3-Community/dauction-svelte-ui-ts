@@ -1,4 +1,5 @@
 <script lang="ts">
+	export let data: any;
 	import {
 		connected,
 		chainId,
@@ -10,6 +11,7 @@
 	} from 'svelte-web3';
 	import NumberInput from '$lib/components/reusables/NumberInput.svelte';
 	import TextInput from '$lib/components/reusables/TextInput.svelte';
+	import { ethers } from 'ethers';
 	import {
 		CURRENCIES,
 		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
@@ -32,7 +34,7 @@
 
 	let formState = {
 		nftContractAddress: '',
-		tokenId: '',
+		tokenId: `${data.tokenId}`,
 		bidPrice: 0,
 		salt: '',
 		currencyAddress: ''
@@ -40,50 +42,84 @@
 
 	let approved = false;
 
-	const checkAllowance = async (address: string) => {
-		approved = false;
-		// if (!tokenId) return;
-		// openModal(LoadingModal);
-		// getApprovalStatus(tokenId);
-		console.log(approved);
-	};
-
-	const getAllowanceStatus = async (address: string, bidPrice: number) => {
-		// try {
-		// 	//@ts-ignore
-		// 	await evm.attachContract('mockToken', address, MockToken.abi);
-		// 	const getAll = await $contracts.mockToken.methods.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI).call();
-		// 	console.log('get allo___', getAll);
-		// 	if (getAll < bidPrice) {
-		// 		approved = false;
-		// 		closeModal();
-		// 		return;
-		// 	} else {
-		// 		approved = true;
-		// 		closeModal();
-		// 		return;
-		// 	}
-		//
-		// } catch (error: any) {
-		// 	approved = false;
-		// 	const msg = error.message;
-		// 	alert(msg.split('{')[0]);
-		// 	closeModal();
-		// 	return;
-		// }
-	};
-
 	onMount(async () => {
-		// if (!$currentAuction) {
-		// 	goto('/explore');
-		// }
-		// if (
-		// 	$selectedAccount &&
-		// 	!$currentAuction?.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())
-		// ) {
-		// 	goto('/explore');
-		// }
+		if (!$currentAuction) {
+			goto('/explore');
+		}
+		if (
+			$selectedAccount &&
+			!$currentAuction?.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())
+		) {
+			goto('/explore');
+		}
 	});
+
+	// const checkAllowance = async (address: string) => {
+	// 	approved = false;
+	// 	// if (!tokenId) return;
+	// 	// openModal(LoadingModal);
+	// 	// getApprovalStatus(tokenId);
+	// 	console.log(approved);
+	// };
+
+	const setAllowance = async (address: string, bidPrice: number) => {
+		openModal(LoadingModal);
+		if (!address || !bidPrice) {
+			closeModal();
+			return;
+		}
+		try {
+			//@ts-ignore
+			await evm.attachContract('mockToken', address, MockToken.abi);
+
+			const newPrice = ethers.BigNumber.from(toWei(bidPrice));
+			const setAll = await $contracts.mockToken.methods
+				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, newPrice)
+				.send({ from: $selectedAccount });
+			console.log('set all_______', setAll);
+			approved = true;
+			closeModal();
+		} catch (error: any) {
+			approved = false;
+			const msg = error.message;
+			alert(msg.split('{')[0]);
+			closeModal();
+			return;
+		}
+	};
+
+	const getAllowanceStatus = async (currencyAddress: string, bidPrice: number) => {
+		openModal(LoadingModal);
+		if (!currencyAddress || !bidPrice) {
+			closeModal();
+			return;
+		}
+		try {
+			const newPrice = ethers.BigNumber.from(toWei(bidPrice));
+			//@ts-ignore
+			await evm.attachContract('mockToken', currencyAddress, MockToken.abi);
+			console.log($contracts.mockToken.methods);
+			const getAll = await $contracts.mockToken.methods
+				.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI)
+				.call();
+			console.log('get allo___', getAll);
+			if (getAll < newPrice) {
+				approved = false;
+				closeModal();
+				return;
+			} else {
+				approved = true;
+				closeModal();
+				return;
+			}
+		} catch (error: any) {
+			approved = false;
+			const msg = error.message;
+			alert(`get allo_ ${msg.split('{')[0]}`);
+			closeModal();
+			return;
+		}
+	};
 
 	const revealBid = async ({
 		nftAddress,
@@ -158,13 +194,15 @@
 				name="nftContractAddress"
 				required={true}
 				bind:value={formState.nftContractAddress}
+				on:blur={() => getAllowanceStatus(formState.currencyAddress, formState.bidPrice)}
 			/>
-			<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
+			<!-- <TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} /> -->
 			<NumberInput
 				label="Bid Price ($)"
 				name="baseBid"
 				required={true}
 				bind:value={formState.bidPrice}
+				on:blur={() => getAllowanceStatus(formState.currencyAddress, formState.bidPrice)}
 			/>
 			<CurrencySelector
 				data={CURRENCIES}
@@ -172,22 +210,43 @@
 				name="currencyAddress"
 				required={true}
 				bind:value={formState.currencyAddress}
+				on:change={() => getAllowanceStatus(formState.currencyAddress, formState.bidPrice)}
 			/>
-			<TextAreaInput
+			<TextInput label="Salt From Bid" name="salt" required={true} bind:value={formState.salt} />
+			<!-- <TextAreaInput
 				label="Token Id"
 				name="tokenId"
 				required={true}
 				bind:value={formState.tokenId}
-			/>
+			/> -->
 
 			<div class="cta">
-				<button type="submit" class="btn-primary submit">
+				<button type="submit" class="btn-primary submit" disabled={!approved}>
 					<span>Reveal Bid</span>
 				</button>
-				<button type="button" class="btn-outline-primary" on:click={() => goto('/explore')}>
+				<button
+					type="button"
+					class="btn-outline-primary"
+					on:click={() => setAllowance(formState.nftContractAddress, formState.bidPrice)}
+					disabled={approved}
+				>
 					<span>Grant Approval</span>
 				</button>
 			</div>
+
+			<!-- <div class="cta">
+				<button type="submit" class="btn-primary submit" disabled={!approved}>
+					<span>Create Auction</span>
+				</button>
+				<button
+					type="button"
+					class="btn-outline-primary"
+					disabled={approved}
+					on:click={() => setApproval(formState.tokenId)}
+				>
+					<span>Grant Approval</span>
+				</button>
+			</div> -->
 		</form>
 	{:else}
 		<h1>You Didnt Bid</h1>

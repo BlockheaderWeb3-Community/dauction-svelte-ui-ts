@@ -10,6 +10,12 @@
 		image: string;
 		name: string;
 	}
+
+	import { createEventDispatcher } from 'svelte';
+	const dispatch = createEventDispatcher();
+	const onChange = (e: any) => {
+		dispatch('change', e.target.value);
+	};
 </script>
 
 <fieldset>
@@ -22,7 +28,7 @@
 		</label>
 	{/if}
 
-	<select {name} bind:value>
+	<select {name} bind:value on:change={onChange}>
 		{#each data as d}
 			<option value={d.address}>
 				<!-- <img src={d.image} alt="" /> -->
