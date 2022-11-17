@@ -6,6 +6,8 @@ export const web3Modal = writable<any>(null);
 
 export const currentAuction = writable<Auction | null>(null);
 
+export const NEW_AUCTION_CHANGES = writable<boolean>(false);
+
 // export const AVAILABLE_AUCTIONS = writable<Auction[]>([]);
 
 const auctionJson: string = (browser && localStorage.getItem('AVAILABLE_AUCTIONS')) || '';

@@ -26,7 +26,7 @@
 	import { openModal, closeModal } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
-	import { currentAuction } from '$lib/stores/main';
+	import { currentAuction, NEW_AUCTION_CHANGES } from '$lib/stores/main';
 	import { goto } from '$app/navigation';
 	import { createSalt, hashCommitmentParams, theRandomNumber } from '$lib/utils/hexUtils';
 	import InfoModal from '$lib/components/modals/InfoModal.svelte';
@@ -43,6 +43,8 @@
 			goto('/explore');
 			return;
 		}
+
+		formState.tokenId = `${$currentAuction.tokenId}`;
 		// if (datetoUnix(new Date()) >= $currentAuction.endTime) {
 		// 	goto('/explore');
 		// }
@@ -68,7 +70,7 @@
 				.createBid(nftAddress, tokenId, bidCommitment, bidToken)
 				.send({ from: $selectedAccount });
 			console.log('new Bid _______', newBid);
-
+			NEW_AUCTION_CHANGES.set(true);
 			closeModal();
 			openModal(InfoModal, {
 				infoTitle: `Bid Placed`,
@@ -136,7 +138,13 @@
 				required={true}
 				bind:value={formState.nftContractAddress}
 			/>
-			<TextInput label="Token Id" name="tokenId" required={true} bind:value={formState.tokenId} />
+			<!-- <TextInput
+				label="Token Id"
+				disabled={true}
+				name="tokenId"
+				required={true}
+				bind:value={formState.tokenId}
+			/> -->
 			<NumberInput
 				label="Bid Price ($)"
 				name="baseBid"

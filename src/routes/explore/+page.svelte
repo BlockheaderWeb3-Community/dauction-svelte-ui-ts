@@ -116,7 +116,7 @@
 											<button
 												class="btn-primary auction-btn-place"
 												on:click={() => handlePlaceBid(auction)}
-												disabled={datetoUnix(new Date()) > auction.revealDuration}
+												disabled={datetoUnix(new Date()) < auction.revealDuration}
 											>
 												<span>Settle Auction</span>
 											</button>

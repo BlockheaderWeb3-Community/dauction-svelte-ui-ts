@@ -6,7 +6,7 @@
 	import { Modals, closeModal, openModal } from 'svelte-modals';
 
 	import { onMount } from 'svelte';
-	import { AVAILABLE_AUCTIONS, web3Modal } from '$lib/stores/main';
+	import { AVAILABLE_AUCTIONS, web3Modal, NEW_AUCTION_CHANGES } from '$lib/stores/main';
 	import { ethers } from 'ethers';
 
 	import Dauction from '$lib/contracts/Dauction.json';
@@ -36,7 +36,7 @@
 		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
 		NFT_CONTRACT_ADDRESS_ON_GOERLI
 	} from '$lib/utils/constants';
-	import { arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
+	import { arrayEquals, arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
 
 	//@ts-ignore
 	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, Dauction.abi);
@@ -116,24 +116,32 @@
 					bidders: bidders,
 					liked: false
 				};
-				auctionsOnDNFT = [...auctionsOnDNFT, newAuction];
+				auctionsOnDNFT = await [...auctionsOnDNFT, newAuction];
+			}
+
+			if (!arrayEquals($AVAILABLE_AUCTIONS, auctionsOnDNFT)) {
+				await AVAILABLE_AUCTIONS.set(sortArrayofObjects(auctionsOnDNFT, 'tokenId'));
 			}
 
 			console.log(auctionsOnDNFT);
-			if (arrayIsNotEqual($AVAILABLE_AUCTIONS, auctionsOnDNFT)) {
-				AVAILABLE_AUCTIONS.set(sortArrayofObjects(auctionsOnDNFT, 'tokenId'));
-			}
+			console.log($AVAILABLE_AUCTIONS);
 
 			closeModal();
+			NEW_AUCTION_CHANGES.set(false);
 		} catch (error: any) {
 			const msg = error.message;
 			alert(msg.split('{')[0]);
 			closeModal();
+			NEW_AUCTION_CHANGES.set(false);
 			return;
 		}
 	};
 
 	$: if ($connected && $selectedAccount !== null) {
+		populateAuctions();
+	}
+
+	$: if ($NEW_AUCTION_CHANGES) {
 		populateAuctions();
 	}
 

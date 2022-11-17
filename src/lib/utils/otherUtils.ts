@@ -5,6 +5,13 @@ export const arrayIsNotEqual = (arr1: any[], arr2: any[]) => {
 	return false;
 };
 
+export const arrayEquals = (a: any[], b: any[]) => {
+	return Array.isArray(a) &&
+			Array.isArray(b) &&
+			a.length === b.length &&
+			a.every((val, index) => val === b[index]);
+}
+
 export const sortArrayofObjects = (array: any, key: any) => {
 	return array.sort((a: any, b:any) => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0));
 };
