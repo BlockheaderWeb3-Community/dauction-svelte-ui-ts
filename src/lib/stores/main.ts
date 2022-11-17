@@ -17,3 +17,11 @@ export const AVAILABLE_AUCTIONS = writable<Auction[]>(
 AVAILABLE_AUCTIONS.subscribe(
 	(value) => browser && (localStorage.AVAILABLE_AUCTIONS = JSON.stringify(value))
 );
+
+const userNFTsJson: string = (browser && localStorage.getItem('USER_NFTS')) || '';
+export const USER_NFTS = writable<any[]>(
+	(userNFTsJson !== '' && JSON.parse(userNFTsJson)) || []
+);
+USER_NFTS.subscribe(
+	(value) => browser && (localStorage.USER_NFTS = JSON.stringify(value))
+);

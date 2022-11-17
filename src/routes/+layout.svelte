@@ -7,11 +7,11 @@
 	import { SvelteToast } from '@zerodevx/svelte-toast';
 
 	import { onMount } from 'svelte';
-	import { AVAILABLE_AUCTIONS, web3Modal, NEW_AUCTION_CHANGES } from '$lib/stores/main';
+	import { AVAILABLE_AUCTIONS, web3Modal, NEW_AUCTION_CHANGES, USER_NFTS } from '$lib/stores/main';
 	import { ethers } from 'ethers';
 
 	import Dauction from '$lib/contracts/Dauction.json';
-	// import MockUSDT from '$lib/contracts/MockUSDT.json';
+	import MockToken from '$lib/contracts/MockToken.json';
 	import NFTContract from '$lib/contracts/NFTContract.json';
 	// import ERC721 from '$lib/contracts/ERC721.json';
 	//@ts-ignore
@@ -46,6 +46,7 @@
 
 	let auctionsOnDNFT: any[] = [];
 	let auctionsOnDNFT_: any[] = [];
+	let userNFTs: any[] = [];
 	let totalMinted = 0;
 
 	const getTotalMintedNFTs = async () => {
@@ -74,14 +75,11 @@
 			.auctions(nftAddress, tokenID)
 			.call();
 		return auctionDetail;
-		// try {
-		// 	const response = await fetch(nftJSONURL);
-		// 	const cResponse = await response.json();
-		// 	return cResponse.image;
-		// } catch (error) {
-		// 	console.log(error);
-		// 	return '';
-		// }
+	};
+
+	const getNFTOwner = async (tokenID: string) => {
+		const nftOwner = await $contracts.nftContract.methods.ownerOf(tokenID).call();
+		return nftOwner;
 	};
 
 	const getBidDetail = async (nftAddress: string, tokenID: string, bidderAddress: string) => {
@@ -96,6 +94,32 @@
 			.getBidders(nftAddress, tokenID)
 			.call();
 		return biddersDetail;
+	};
+
+	const getUserNFTs = async () => {
+		userNFTs = [];
+		try {
+			openModal(LoadingModal);
+			await getTotalMintedNFTs();
+			for (let i = 0; i < totalMinted; i++) {
+				let nftOwner = await getNFTOwner(`${i}`);
+				if ($selectedAccount?.toLowerCase() === nftOwner.toLowerCase()) {
+					let token_uri = await getNFTImage($contracts.nftContract, `${i}`);
+					let token = { tokenId: i, image: token_uri, liked: false };
+					userNFTs = [...userNFTs, token];
+				}
+			}
+			if (!arrayEquals($USER_NFTS, userNFTs)) {
+				await USER_NFTS.set(sortArrayofObjects(userNFTs, 'tokenId'));
+			}
+			console.log($USER_NFTS);
+			closeModal();
+		} catch (error: any) {
+			const msg = error.message;
+			alert(msg.split('{')[0]);
+			closeModal();
+			return;
+		}
 	};
 
 	const populateAuctions = async () => {
@@ -160,10 +184,12 @@
 
 	$: if ($connected && $selectedAccount !== null) {
 		populateAuctions();
+		getUserNFTs();
 	}
 
 	$: if ($NEW_AUCTION_CHANGES) {
 		populateAuctions();
+		getUserNFTs();
 	}
 
 	$: console.log($AVAILABLE_AUCTIONS.length);

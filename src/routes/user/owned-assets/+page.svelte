@@ -2,6 +2,8 @@
 	import { goto } from '$app/navigation';
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
 	import type { AuctionDummy } from '$lib/interfaces';
+	import { USER_NFTS } from '$lib/stores/main';
+	import { RANDOM_PROFILE } from '$lib/utils/constants';
 	import { onMount } from 'svelte';
 
 	let drawerContent: HTMLDivElement;
@@ -35,10 +37,12 @@
 	// 		liked: false
 	// 	}
 	// ];
+
+	const randomProfilePic = RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)];
 </script>
 
 <div bind:this={drawerContent} class="owned-assets user-template" style="width: 100%;height: 100%">
-	{#if auctions.length > 0}
+	{#if $USER_NFTS.length > 0}
 		<div class="top">
 			<div class="toolbar">
 				<div class="search-container">
@@ -51,19 +55,19 @@
 			</div>
 		</div>
 		<div class="auctions-container">
-			{#each auctions as auction}
+			{#each $USER_NFTS as auction}
 				<div class="auction">
 					<div class="auction-card">
 						<div class="content">
 							<CardTopTemplate
-								profile_name={auction.profile_name}
-								profile_desc={auction.profile_desc}
-								profile_pic={auction.profile_pic}
-								nft={auction.nft}
+								profile_name={'auction.profile_name'}
+								profile_desc={'auction.profile_desc'}
+								profile_pic={randomProfilePic}
+								nft={auction.image}
 								liked={auction.liked}
-								tokenId={1}
+								tokenId={auction.tokenId}
 							/>
-							<div class="auction-card-bottom">
+							<!-- <div class="auction-card-bottom">
 								<div class="left">
 									<span>Base Bid</span>
 									<h4>{auction.crypto_price.toLocaleString()}<span>MATIC</span></h4>
@@ -83,7 +87,7 @@
 										).toLocaleString()}
 									</p>
 								</div>
-							</div>
+							</div> -->
 							<div class="auction-btns">
 								<button class="btn-outline-primary auction-btn-explore">
 									<span>Put on Auction</span>
@@ -177,7 +181,7 @@
 		border: 1.05854px solid var(--primary);
 		position: absolute;
 		width: 230px;
-		height: 389.46px;
+		height: 329.46px;
 		top: 12px;
 		left: 12px;
 		z-index: 1;
