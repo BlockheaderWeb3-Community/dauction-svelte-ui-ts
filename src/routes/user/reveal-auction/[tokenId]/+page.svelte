@@ -10,9 +10,6 @@
 	} from 'svelte-web3';
 	import NumberInput from '$lib/components/reusables/NumberInput.svelte';
 	import TextInput from '$lib/components/reusables/TextInput.svelte';
-	import TimeInput from '$lib/components/reusables/TimeInput.svelte';
-	import DateInput from '$lib/components/reusables/DateInput.svelte';
-	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
 	import {
 		CURRENCIES,
 		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
@@ -22,58 +19,62 @@
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
 
-	import { openModal, closeModal } from 'svelte-modals';
+	import { openModal, closeModal, closeAllModals } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
 	import { currentAuction } from '$lib/stores/main';
 	import { goto } from '$app/navigation';
 	import { createSalt, hashCommitmentParams, theRandomNumber } from '$lib/utils/hexUtils';
 	import InfoModal from '$lib/components/modals/InfoModal.svelte';
+	import TextAreaInput from '$lib/components/reusables/TextAreaInput.svelte';
+	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
 
 	let formState = {
 		nftContractAddress: '',
 		tokenId: '',
 		bidPrice: 0,
+		salt: '',
 		currencyAddress: ''
 	};
+
+	let approved = false;
 
 	onMount(async () => {
 		if (!$currentAuction) {
 			goto('/explore');
-			return;
 		}
-		// if (datetoUnix(new Date()) >= $currentAuction.endTime) {
-		// 	goto('/explore');
-		// }
+
+		if (!$currentAuction.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())) {
+			goto('/explore');
+		}
 	});
 
-	const createBid = async ({
+	const revealBid = async ({
 		nftAddress,
 		tokenId,
-		bidCommitment,
-		bidToken,
+		bidValue,
 		salt
 	}: {
 		nftAddress: string;
 		tokenId: string;
-		bidCommitment: string;
-		bidToken: string;
+		bidValue: string;
 		salt: string;
 	}) => {
-		console.log(nftAddress, tokenId, bidCommitment, bidToken, salt);
+		console.log(nftAddress, tokenId, bidValue, salt);
 
 		try {
-			const newBid = await $contracts.dauctionContract.methods
-				.createBid(nftAddress, tokenId, bidCommitment, bidToken)
+			const revealBid = await $contracts.dauctionContract.methods
+				.revealBid(nftAddress, tokenId, bidValue, salt)
 				.send({ from: $selectedAccount });
-			console.log('new Bid _______', newBid);
+			console.log('reveal Bid _______', revealBid);
 
 			closeModal();
-			openModal(InfoModal, {
-				infoTitle: `Bid Placed`,
-				infoText: `Write down your salt -  ${salt}`
-			});
-			// currentAuction.set(null);
+			alert('Bid Revealed, Awaiting Winner');
+			// openModal(InfoModal, {
+			// 	infoTitle: `Bid Reveal`,
+			// 	infoText: `Write down your salt -  ${salt}`
+			// });
+			currentAuction.set(null);
 		} catch (error: any) {
 			console.log(error);
 			const msg = error.message;
@@ -96,36 +97,22 @@
 
 		if ($selectedAccount?.toLowerCase() === $currentAuction.owner.toLowerCase()) {
 			closeModal();
-			alert('Auctioneer cannot place bid');
-			return;
-		}
-		if (formState.bidPrice <= Number(fromWei($currentAuction.minBidPrice))) {
-			closeModal();
-			alert('Bid cannot be less than base bid');
+			alert('Auctioneer cannot reveal bid');
 			return;
 		}
 
-		const salt = createSalt(theRandomNumber);
-		const bidCommitment = hashCommitmentParams(formState.bidPrice, salt);
-
-		createBid({
+		revealBid({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
-			bidCommitment: bidCommitment,
-			bidToken: formState.currencyAddress,
-			salt: salt
+			bidValue: formState.bidPrice.toString(),
+			salt: formState.salt
 		});
 	};
 </script>
 
-<div class="create-bid">
-	<h1 class="title">Create Bid</h1>
-	{#if $currentAuction?.owner?.toLowerCase() === $selectedAccount?.toLowerCase()}
-		<h1>You Cant Bid on Your Own Auction</h1>
-	{:else if !$currentAuction.bidders
-		.join('')
-		.toLowerCase()
-		.includes($selectedAccount?.toLowerCase())}
+<div class="reveal-bid">
+	<h1 class="title">Reveal Bid</h1>
+	{#if $currentAuction.bidders.join('').toLowerCase().includes($selectedAccount?.toLowerCase())}
 		<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">
 			<TextInput
 				label="NFT Contract Address"
@@ -141,7 +128,6 @@
 				bind:value={formState.bidPrice}
 				info={`Base bid - $${$currentAuction && fromWei($currentAuction.minBidPrice)}`}
 			/>
-			<!-- <span></span> -->
 			<CurrencySelector
 				data={CURRENCIES}
 				label="Choose Currency"
@@ -149,23 +135,29 @@
 				required={true}
 				bind:value={formState.currencyAddress}
 			/>
+			<TextAreaInput
+				label="Token Id"
+				name="tokenId"
+				required={true}
+				bind:value={formState.tokenId}
+			/>
 
 			<div class="cta">
 				<button type="submit" class="btn-primary submit">
-					<span>Place Bid</span>
+					<span>Reveal Bid</span>
 				</button>
 				<button type="button" class="btn-outline-primary" on:click={() => goto('/explore')}>
-					<span>Go Back</span>
+					<span>Grant Approval</span>
 				</button>
 			</div>
 		</form>
 	{:else}
-		<h1>You Already Bidded</h1>
+		<h1>You Didnt Bid</h1>
 	{/if}
 </div>
 
 <style>
-	.create-bid {
+	.reveal-bid {
 		display: flex;
 		flex-direction: column;
 		width: 100%;
@@ -173,40 +165,40 @@
 		color: var(--white-background);
 	}
 
-	.create-bid .title {
+	.reveal-bid .title {
 		font-family: 'Darker Grotesque';
 		font-weight: 500;
 		font-size: 88px;
 		line-height: 85%;
 	}
 
-	.create-bid form {
+	.reveal-bid form {
 		width: 588px;
 		display: flex;
 		flex-direction: column;
 		gap: 24px;
 	}
 
-	/* .create-bid form .collection {
+	/* .reveal-bid form .collection {
 	} */
 
-	.create-bid form .collection span {
+	.reveal-bid form .collection span {
 		font-weight: 500;
 		font-size: 20px;
 		padding: 16px;
 	}
-	.create-bid form .collection div {
+	.reveal-bid form .collection div {
 		display: flex;
 	}
 
-	.create-bid form .cta {
+	.reveal-bid form .cta {
 		display: flex;
 		width: 100%;
 		justify-content: space-between;
 		gap: 10px;
 	}
 
-	.create-bid form .cta button {
+	.reveal-bid form .cta button {
 		width: 50%;
 	}
 </style>

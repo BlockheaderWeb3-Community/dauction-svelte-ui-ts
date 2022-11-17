@@ -142,4 +142,9 @@
 	:global(.modal) {
 		z-index: 9999;
 	}
+
+	:global(.modal .contents) {
+		z-index: 9999;
+		background: rgba(255, 255, 255, 0.3) !important;
+	}
 </style>

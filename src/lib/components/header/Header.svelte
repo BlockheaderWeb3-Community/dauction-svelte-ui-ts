@@ -53,13 +53,14 @@
 						</button>
 					</li>
 				{:else}
-					<li>
+					<!-- <li>
 						<img style="width: 48px" src="/images/profile-images/nav-profile-pic.svg" alt="" />
-					</li>
-					<li>
+					</li> -->
+					<li class="account">
 						<button class="btn-outline-primary wallet-connected-button" on:click={disconnectWallet}>
 							<img class="nav-profile-pic" src="/icons/wallet-connected.svg" alt="" />
 						</button>
+						<span>{`${$selectedAccount?.slice(0, 6)}...${$selectedAccount?.slice(-4)}`}</span>
 					</li>
 					<!-- <li>
 						<a href="#logout" >
@@ -71,3 +72,14 @@
 		</nav>
 	</div>
 </header>
+
+<style>
+	.account {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		color: var(--white-background);
+		font-size: 24px;
+		font-weight: 500;
+	}
+</style>

@@ -124,6 +124,11 @@
 		await currentAuction.set(auction);
 		goto(`/user/bid-auction/${auction.tokenId}`);
 	};
+
+	const handleRevealBid = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/reveal-auction/${auction.tokenId}`);
+	};
 </script>
 
 <div class="wrapper">
@@ -179,7 +184,7 @@
 											{#if auction.bidders
 												.join('')
 												.toLowerCase()
-												.includes($selectedAccount?.toLowerCase())}
+												.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
 												<span>Time to Reveal</span>
 												<h4>
 													<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
@@ -205,8 +210,8 @@
 											.includes($selectedAccount?.toLowerCase())}
 											<button
 												class="btn-primary auction-btn-place"
-												on:click={() => handlePlaceBid(auction)}
-												disabled={!datetoUnix(new Date()) >= auction.endTime}
+												on:click={() => handleRevealBid(auction)}
+												disabled={datetoUnix(new Date()) < auction.endTime}
 											>
 												<span>Reveal Bid</span>
 											</button>
@@ -268,6 +273,10 @@
 	.explore .auction-card .content .auction-card-bottom .right > span,
 	.explore .auction-card .content .auction-card-bottom .right p {
 		font-size: 14px;
+	}
+
+	.explore .auction-card .content .auction-card-bottom .right p span {
+		font-size: 16px;
 	}
 
 	.explore .auction-card .content .auction-card-bottom .right p {

@@ -1,18 +1,22 @@
 <script lang="ts">
 	import { closeModal } from 'svelte-modals';
-	import { SyncLoader } from 'svelte-loading-spinners';
 
 	// provided by <Modals />
 	export let isOpen: boolean;
+	export let infoTitle = '';
+	export let infoText = '';
 </script>
 
 {#if isOpen}
 	<div role="dialog" class="modal">
 		<div class="contents">
-			<SyncLoader size="60" color="#d3f85a" unit="px" duration="1s" />
-			<!-- <div class="actions">
-				<button on:click={closeModal}>OK</button>
-			</div> -->
+			<div class="contents-1">
+				<h2>{infoTitle}</h2>
+				<p>{infoText}</p>
+				<div class="actions">
+					<button on:click={closeModal}>OK</button>
+				</div>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -35,14 +39,21 @@
 	.contents {
 		min-width: 240px;
 		border-radius: 6px;
-		padding: 16px;
+		padding: 1px;
 		background: white;
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
 		pointer-events: auto;
 	}
-	/* 
+
+	.contents-1 {
+		width: 100%;
+		background-color: var(--dark-background);
+		color: var(--primary);
+		padding: 16px;
+	}
+
 	h2 {
 		text-align: center;
 		font-size: 24px;
@@ -51,11 +62,13 @@
 	p {
 		text-align: center;
 		margin-top: 16px;
+		font-size: 24px;
+		font-weight: 500;
 	}
 
 	.actions {
 		margin-top: 32px;
 		display: flex;
 		justify-content: flex-end;
-	} */
+	}
 </style>

@@ -190,13 +190,6 @@
 			required={true}
 			bind:value={formState.baseBid}
 		/>
-		<!-- <CurrencySelector
-			data={CURRENCIES}
-			label="Choose Currency"
-			name="currencyAddress"
-			required={true}
-			bind:value={formState.currencyAddress}
-		/> -->
 		<div class="collection">
 			<span>Start Date & Time</span>
 			<div>
