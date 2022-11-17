@@ -2,20 +2,14 @@
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
 	import type { Auction } from '$lib/interfaces';
 	import { onMount } from 'svelte';
-	import { AVAILABLE_AUCTIONS } from '$lib/stores/main';
+	import { AVAILABLE_AUCTIONS, currentAuction } from '$lib/stores/main';
 	import { RANDOM_PROFILE } from '$lib/utils/constants';
 	import { formatPrice } from '$lib/utils/conversionUtils';
-	import {
-		connected,
-		chainId,
-		selectedAccount,
-		defaultEvmStores as evm,
-		web3,
-		//@ts-ignore
-		contracts
-	} from 'svelte-web3';
+	import { selectedAccount } from 'svelte-web3';
 	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
 	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
+	import { goto } from '$app/navigation';
+	import { sortArrayofObjects } from '$lib/utils/otherUtils';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
@@ -25,7 +19,17 @@
 		};
 	});
 
-	const auction: Auction = {
+	const handlePlaceBid = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/bid-auction/${auction.tokenId}`);
+	};
+
+	const handleRevealBid = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/reveal-auction/${auction.tokenId}`);
+	};
+
+	/* const auction: Auction = {
 		id: Math.floor(1000 + Math.random() * 9000),
 		profile_name: 'Bored Ape Yacht Club',
 		profile_desc: 'BoredApeYachtClub #8867',
@@ -50,6 +54,7 @@
 	// bids: Math.floor(Math.random() * 90 + 10)
 	// 	}
 	// ];
+	*/
 </script>
 
 <div bind:this={drawerContent} class="biddings user-template" style="width: 100%;height: 100%">
@@ -66,10 +71,10 @@
 			</div>
 		</div>
 		<div class="auctions-container">
-			{#each $AVAILABLE_AUCTIONS.filter((x) => $selectedAccount && x.bidders
+			{#each sortArrayofObjects($AVAILABLE_AUCTIONS.filter((x) => $selectedAccount && x.bidders
 						.join('')
 						.toLowerCase()
-						.includes($selectedAccount?.toLowerCase())) as auction}
+						.includes($selectedAccount?.toLowerCase())), 'tokenId') as auction}
 				<div class="auction">
 					<div class="auction-card">
 						<div class="content">
@@ -78,7 +83,8 @@
 								profile_desc={'auction.profile_desc'}
 								profile_pic={RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)]}
 								nft={auction.image}
-								liked={false}
+								liked={auction.liked}
+								tokenId={auction.tokenId}
 							/>
 							<div class="auction-card-bottom">
 								<div class="left">
@@ -111,9 +117,40 @@
 								</div>
 							</div>
 							<div class="auction-btns">
-								<button class="btn-primary auction-btn-place">
+								{#if $selectedAccount && auction.bidders
+										.join('')
+										.toLowerCase()
+										.includes($selectedAccount?.toLowerCase())}
+									<button
+										class="btn-primary auction-btn-place"
+										on:click={() => handleRevealBid(auction)}
+										disabled={!(
+											datetoUnix(new Date()) > auction.endTime &&
+											datetoUnix(new Date()) < auction.revealDuration
+										)}
+									>
+										<span>Reveal Bid</span>
+									</button>
+									<!--{:else if !auction.bidders
+									.join('')
+									.toLowerCase()
+									.includes($selectedAccount?.toLowerCase())}
+									 <button
+									class="btn-primary auction-btn-place"
+									on:click={() => handlePlaceBid(auction)}
+									disabled={datetoUnix(new Date()) >= auction.endTime}
+								>
 									<span>Place a Bid</span>
-								</button>
+								</button> -->
+								{:else}
+									<button
+										class="btn-primary auction-btn-place"
+										on:click={() => handlePlaceBid(auction)}
+										disabled={datetoUnix(new Date()) >= auction.endTime}
+									>
+										<span>Place a Bid</span>
+									</button>
+								{/if}
 								<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
 									<span>View</span>
 								</button>

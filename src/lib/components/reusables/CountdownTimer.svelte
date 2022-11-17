@@ -38,7 +38,7 @@
 	// Update the count down every 1 second
 </script>
 
-<div class="displayDiv" bind:this={displayDiv} />
+<div class="displayDiv" bind:this={displayDiv}>---</div>
 
 <style>
 	/* .displayDiv {

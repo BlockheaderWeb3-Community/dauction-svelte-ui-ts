@@ -1,7 +1,13 @@
 <script lang="ts">
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
-	import type { Auction } from '$lib/interfaces';
 	import { onMount } from 'svelte';
+	import { selectedAccount } from 'svelte-web3';
+	import { AVAILABLE_AUCTIONS, currentAuction } from '$lib/stores/main';
+	import { RANDOM_PROFILE } from '$lib/utils/constants';
+	import { formatPrice } from '$lib/utils/conversionUtils';
+	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
+	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
+	import { goto } from '$app/navigation';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
@@ -11,7 +17,17 @@
 		};
 	});
 
-	const auction: Auction = {
+	const handlePlaceBid = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/bid-auction/${auction.tokenId}`);
+	};
+
+	const handleRevealBid = async (auction: any) => {
+		await currentAuction.set(auction);
+		goto(`/user/reveal-auction/${auction.tokenId}`);
+	};
+
+	/* const auction: Auction = {
 		id: Math.floor(1000 + Math.random() * 9000),
 		profile_name: 'Bored Ape Yacht Club',
 		profile_desc: 'BoredApeYachtClub #8867',
@@ -35,12 +51,14 @@
 			liked: true,
 			bids: Math.floor(Math.random() * 90 + 10)
 		}
-	];
+	];	
+	
 	const likedAuctions = auctions.filter((auction) => auction.liked === true);
+	*/
 </script>
 
 <div bind:this={drawerContent} class="liked-assets user-template" style="width: 100%;height: 100%">
-	{#if likedAuctions.length > 0}
+	{#if $AVAILABLE_AUCTIONS.length > 0}
 		<div class="top">
 			<div class="toolbar">
 				<div class="search-container">
@@ -53,35 +71,72 @@
 			</div>
 		</div>
 		<div class="auctions-container">
-			{#each likedAuctions as auction}
+			{#each $AVAILABLE_AUCTIONS.filter((x) => x.liked === true) as auction}
 				<div class="auction">
 					<div class="auction-card">
 						<div class="content">
 							<CardTopTemplate
-								profile_name={auction.profile_name}
-								profile_desc={auction.profile_desc}
-								profile_pic={auction.profile_pic}
-								nft={auction.nft}
+								profile_name={'auction.profile_name'}
+								profile_desc={'auction.profile_desc'}
+								profile_pic={RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)]}
+								nft={auction.image}
 								liked={auction.liked}
+								tokenId={auction.tokenId}
 							/>
 							<div class="auction-card-bottom">
 								<div class="left">
 									<span>Base Bid</span>
-									<h4>{auction.crypto_price.toLocaleString()}<span>MATIC</span></h4>
-									<span class="usd" style="font-weight: 700"
+									<h4>${formatPrice(auction.minBidPrice)}</h4>
+									<!-- <span class="usd" style="font-weight: 700"
 										>${auction.usd_price.toLocaleString()}</span
-									>
+									> -->
 								</div>
 								<div class="right">
-									<span>Remaning Time</span>
-									<h4>09h 24m 02s</h4>
-									<p><span class="usd">{auction.bids}</span>bids placed</p>
+									{#if $selectedAccount && auction.bidders
+											.join('')
+											.toLowerCase()
+											.includes($selectedAccount?.toLowerCase()) && datetoUnix(new Date()) > auction.endTime}
+										<span>Time left to reveal</span>
+										<h4>
+											<CountdownTimer endTime={unixToDate(auction.revealDuration)} />
+										</h4>
+									{:else}
+										<span>Remaning Time</span>
+										<h4>
+											<CountdownTimer endTime={unixToDate(auction.endTime)} />
+										</h4>
+									{/if}
+									<p>
+										<span class="usd">{auction.bidders.length}</span>{`${
+											auction.bidders.length > 1 ? 'bids' : 'bid'
+										} placed`}
+									</p>
 								</div>
 							</div>
 							<div class="auction-btns">
-								<button class="btn-primary auction-btn-place">
-									<span>Place a Bid</span>
-								</button>
+								{#if $selectedAccount && auction.bidders
+										.join('')
+										.toLowerCase()
+										.includes($selectedAccount?.toLowerCase())}
+									<button
+										class="btn-primary auction-btn-place"
+										on:click={() => handleRevealBid(auction)}
+										disabled={!(
+											datetoUnix(new Date()) > auction.endTime &&
+											datetoUnix(new Date()) < auction.revealDuration
+										)}
+									>
+										<span>Reveal Bid</span>
+									</button>
+								{:else}
+									<button
+										class="btn-primary auction-btn-place"
+										on:click={() => handlePlaceBid(auction)}
+										disabled={datetoUnix(new Date()) >= auction.endTime}
+									>
+										<span>Place a Bid</span>
+									</button>
+								{/if}
 								<button class="btn-outline-primary auction-btn-explore" style="width: 50%;">
 									<span>View</span>
 								</button>

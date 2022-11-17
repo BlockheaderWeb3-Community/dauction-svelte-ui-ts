@@ -1,4 +1,18 @@
 export interface Auction {
+	auctionStatus: string;
+	bidders: string[];
+	endTime: number;
+	image: string;
+	minBidPrice: string;
+	owner: string;
+	revealDuration: number;
+	startTime: number;
+	tokenId: number;
+	liked: boolean;
+}
+
+
+export interface AuctionDummy {
 	id: number;
 	profile_name: string;
 	profile_desc: string;

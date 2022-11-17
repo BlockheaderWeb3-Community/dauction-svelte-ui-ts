@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
-	import type { Auction } from '$lib/interfaces';
+	import type { AuctionDummy } from '$lib/interfaces';
 	import { onMount } from 'svelte';
 
 	let drawerContent: HTMLDivElement;
@@ -11,7 +12,7 @@
 		};
 	});
 
-	const auction: Auction = {
+	const auction: AuctionDummy = {
 		id: Math.floor(1000 + Math.random() * 9000),
 		profile_name: 'Bored Ape Yacht Club',
 		profile_desc: 'BoredApeYachtClub #8867',
@@ -21,7 +22,7 @@
 		usd_price: 125029,
 		liked: false
 	};
-	const auctions: Auction[] = [];
+	const auctions: AuctionDummy[] = [];
 	// 	auction,
 	// 	{
 	// 		id: Math.floor(1000 + Math.random() * 9000),
@@ -60,6 +61,7 @@
 								profile_pic={auction.profile_pic}
 								nft={auction.nft}
 								liked={auction.liked}
+								tokenId={1}
 							/>
 							<div class="auction-card-bottom">
 								<div class="left">
@@ -102,7 +104,7 @@
 			<span>
 				You currently have no assets owned. Explore assets on auction and place a bid to own assets
 			</span>
-			<button class="btn-primary short-button">
+			<button class="btn-primary short-button" on:click={() => goto('/explore')}>
 				<span>Explore Auctions</span>
 				<img src="/icons/arrow-forward-black.svg" alt="" />
 			</button>

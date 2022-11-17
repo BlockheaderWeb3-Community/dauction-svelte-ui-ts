@@ -6,13 +6,14 @@
 	import UserHeader from '$lib/components/user/UserHeader.svelte';
 	import NeverMissSection from '$lib/components/never-miss-section/NeverMissSection.svelte';
 	import NotConnected from '$lib/components/not-connected/NotConnected.svelte';
+	import { currentAuction } from '$lib/stores/main';
 
 	onMount(() => {});
 </script>
 
 {#if $connected && $selectedAccount !== null}
 	<div class="main">
-		{#if $page.url.pathname.includes('create-auction') || $page.url.pathname.includes('bid-auction')}
+		{#if $page.url.pathname.includes('create-auction') || $page.url.pathname.includes('bid-auction') || $page.url.pathname.includes('reveal-auction')}
 			<slot />
 		{:else}
 			<UserHeader account={$selectedAccount} />

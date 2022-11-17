@@ -36,7 +36,7 @@
 		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
 		NFT_CONTRACT_ADDRESS_ON_GOERLI
 	} from '$lib/utils/constants';
-	import { arrayIsNotEqual } from '$lib/utils/otherUtils';
+	import { arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
 
 	//@ts-ignore
 	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, Dauction.abi);
@@ -110,13 +110,18 @@
 				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
 					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
 				}
-				let newAuction = await { ...auctionsOnDNFT_[i], image: image, bidders: bidders };
+				let newAuction = await {
+					...auctionsOnDNFT_[i],
+					image: image,
+					bidders: bidders,
+					liked: false
+				};
 				auctionsOnDNFT = [...auctionsOnDNFT, newAuction];
 			}
 
 			console.log(auctionsOnDNFT);
 			if (arrayIsNotEqual($AVAILABLE_AUCTIONS, auctionsOnDNFT)) {
-				AVAILABLE_AUCTIONS.set(auctionsOnDNFT);
+				AVAILABLE_AUCTIONS.set(sortArrayofObjects(auctionsOnDNFT, 'tokenId'));
 			}
 
 			closeModal();

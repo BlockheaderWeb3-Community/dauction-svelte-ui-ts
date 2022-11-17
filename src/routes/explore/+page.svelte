@@ -19,7 +19,7 @@
 	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
 	import { AVAILABLE_AUCTIONS, currentAuction } from '$lib/stores/main';
 	import { formatPrice, fromWei } from '$lib/utils/conversionUtils';
-	import { arrayIsNotEqual } from '$lib/utils/otherUtils';
+	import { arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
 
 	onMount(() => {});
 
@@ -68,7 +68,7 @@
 
 			<div class="explore">
 				<div class="auctions-container">
-					{#each $AVAILABLE_AUCTIONS as auction}
+					{#each sortArrayofObjects($AVAILABLE_AUCTIONS, 'tokenId') as auction}
 						<div class="auction">
 							<div class="auction-card">
 								<div class="content">
@@ -77,7 +77,7 @@
 										profile_desc={'auction.profile_desc'}
 										profile_pic={RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)]}
 										nft={auction.image}
-										liked={false}
+										liked={auction.liked}
 									/>
 									<div class="auction-card-bottom">
 										<div class="left">
@@ -118,7 +118,10 @@
 											<button
 												class="btn-primary auction-btn-place"
 												on:click={() => handleRevealBid(auction)}
-												disabled={datetoUnix(new Date()) < auction.endTime}
+												disabled={!(
+													datetoUnix(new Date()) > auction.endTime &&
+													datetoUnix(new Date()) < auction.revealDuration
+												)}
 											>
 												<span>Reveal Bid</span>
 											</button>
