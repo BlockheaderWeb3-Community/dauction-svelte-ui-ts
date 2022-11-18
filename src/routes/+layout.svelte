@@ -146,14 +146,14 @@
 				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
 					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_MUMBAI, auctionsOnDNFT_[i].tokenId);
 
-					for (let j = 0; j < bidders.length; j++) {
-						const x = await getBidDetail(
-							NFT_CONTRACT_ADDRESS_ON_MUMBAI,
-							auctionsOnDNFT_[j].tokenId,
-							bidders[0]
-						);
-						bidders_ = [...bidders_, { ...x, address: bidders[j] }];
-					}
+					// for (let j = 0; j < bidders.length; j++) {
+					// 	const x = await getBidDetail(
+					// 		NFT_CONTRACT_ADDRESS_ON_MUMBAI,
+					// 		auctionsOnDNFT_[j].tokenId,
+					// 		bidders[0]
+					// 	);
+					// 	bidders_ = [...bidders_, { ...x, address: bidders[j] }];
+					// }
 
 					// console.log('x_____', x.amountBidded);
 				}

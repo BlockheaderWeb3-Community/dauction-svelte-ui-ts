@@ -8,7 +8,7 @@ const theRandomNumber = Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
 const hexify = (payload: number) => ethers.utils.hexZeroPad(ethers.utils.hexlify(payload), 32);
 
 // convert num to salt
-const createSalt = (num: string | number) => {
+const createSalt = (num: number) => {
 	const salt = ethers.utils.keccak256(ethers.utils.arrayify(num));
 	return salt;
 };

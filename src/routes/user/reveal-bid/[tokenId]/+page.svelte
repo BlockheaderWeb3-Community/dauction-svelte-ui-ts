@@ -14,7 +14,7 @@
 	import { ethers } from 'ethers';
 	import {
 		CURRENCIES_ON_MUMBAI,
-		DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI,
+		DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI
 	} from '$lib/utils/constants';
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
@@ -173,7 +173,8 @@
 		}
 
 		const newPrice = ethers.BigNumber.from(toWei(formState.bidPrice.toString()));
-		const salt = createSalt(formState.saltRandomNumber);
+		const salt = createSalt(Number(formState.saltRandomNumber));
+		console.log(salt);
 		revealBid({
 			nftAddress: formState.nftContractAddress,
 			tokenId: formState.tokenId,
