@@ -15,9 +15,7 @@
 	import DateInput from '$lib/components/reusables/DateInput.svelte';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
 	import { ethers } from 'ethers';
-	import {
-		CURRENCIES_ON_MUMBAI,
-	} from '$lib/utils/constants';
+	import { CURRENCIES_ON_MUMBAI } from '$lib/utils/constants';
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
 
@@ -35,6 +33,9 @@
 		bidPrice: 0,
 		currencyAddress: ''
 	};
+
+	const MIN = 1;
+	const MAX = 1000000;
 
 	onMount(async () => {
 		if (!$currentAuction) {
@@ -106,7 +107,7 @@
 		// 	alert('Bid cannot be less than base bid');
 		// 	return;
 		// }
-		const saltRandomNumber = theRandomNumber;
+		const saltRandomNumber = Math.floor(Math.random() * (MAX - MIN + 1) + MIN);
 		const salt = createSalt(saltRandomNumber);
 		const newPrice = ethers.BigNumber.from(toWei(formState.bidPrice));
 		console.log('new PRice', newPrice);
