@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-	<title>Daution</title>
+	<title>Dauction</title>
 	<meta name="description" content="Dauction - Decentralized sealed-bidding auctions" />
 </svelte:head>
 

@@ -3,7 +3,7 @@
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
 	import type { Auction, AuctionDummy } from '$lib/interfaces';
 	import { USER_NFTS, nftToAuction } from '$lib/stores/main';
-	import { NFT_CONTRACT_ADDRESS_ON_GOERLI, RANDOM_PROFILE } from '$lib/utils/constants';
+	import { NFT_CONTRACT_ADDRESS_ON_MUMBAI, RANDOM_PROFILE } from '$lib/utils/constants';
 	import { scrollIntoView } from '$lib/utils/otherUtils';
 	import { onMount } from 'svelte';
 
@@ -17,7 +17,7 @@
 
 	const putOnAuction = async (nft: any) => {
 		await nftToAuction.set({
-			contractAddress: NFT_CONTRACT_ADDRESS_ON_GOERLI,
+			contractAddress: NFT_CONTRACT_ADDRESS_ON_MUMBAI,
 			tokenId: nft.tokenId
 		});
 		goto('/user/create-auction');

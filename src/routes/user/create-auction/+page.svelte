@@ -17,10 +17,8 @@
 	import { ethers } from 'ethers';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
 	import {
-		CURRENCIES,
-		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
-		DELAY_MINUTES,
-		NFT_CONTRACT_ADDRESS_ON_GOERLI
+		DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI,
+		DELAY_MINUTES
 	} from '$lib/utils/constants';
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
@@ -69,7 +67,7 @@
 		try {
 			const getAppr = await $contracts.nftContract.methods.getApproved(tokenId).call();
 			console.log('get appr_______', getAppr);
-			if (getAppr.toLowerCase() === DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI.toLowerCase()) {
+			if (getAppr.toLowerCase() === DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI.toLowerCase()) {
 				approved = true;
 				closeModal();
 				return;
@@ -92,7 +90,7 @@
 		openModal(LoadingModal);
 		try {
 			const setAppr = await $contracts.nftContract.methods
-				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, tokenId)
+				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI, tokenId)
 				.send({ from: $selectedAccount });
 			console.log('set appr_______', setAppr);
 			approved = true;

@@ -2,7 +2,7 @@
 	<div class="wrapper">
 		<div class="content">
 			<div class="social-infos">
-				<h5>Daution</h5>
+				<h5>Dauction</h5>
 				<p>
 					The first marketplace for decentralized sealed-bidding auctions. Place your bid privately
 					and may the highest bid win!

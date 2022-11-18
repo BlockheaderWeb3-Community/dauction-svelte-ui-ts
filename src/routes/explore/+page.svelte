@@ -12,12 +12,12 @@
 
 	import { openModal, closeModal } from 'svelte-modals';
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
-	import { NFT_CONTRACT_ADDRESS_ON_GOERLI, RANDOM_PROFILE } from '$lib/utils/constants';
+	import { RANDOM_PROFILE } from '$lib/utils/constants';
 	import ExploreCardTopTemplate from '$lib/components/ExploreCardTopTemplate.svelte';
 	import { goto } from '$app/navigation';
 	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
 	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
-	import { AVAILABLE_AUCTIONS, currentAuction } from '$lib/stores/main';
+	import { AVAILABLE_AUCTIONS, currentAuction, NEW_AUCTION_CHANGES } from '$lib/stores/main';
 	import { formatPrice, fromWei } from '$lib/utils/conversionUtils';
 	import { arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
 
@@ -26,6 +26,7 @@
 
 	onMount(() => {
 		// console.log($AVAILABLE_AUCTIONS[0]?.bidders_);
+		NEW_AUCTION_CHANGES.set(true);
 	});
 
 	$: if ($AVAILABLE_AUCTIONS.length > 0) {

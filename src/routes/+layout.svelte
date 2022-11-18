@@ -8,7 +8,6 @@
 
 	import { onMount } from 'svelte';
 	import { AVAILABLE_AUCTIONS, web3Modal, NEW_AUCTION_CHANGES, USER_NFTS } from '$lib/stores/main';
-	import { ethers } from 'ethers';
 
 	import Dauction from '$lib/contracts/Dauction.json';
 	import MockToken from '$lib/contracts/MockToken.json';
@@ -34,15 +33,18 @@
 	import { browserGet, browserSet } from '$lib/utils/requestUtils';
 	import { variables } from '$lib/variables';
 	import {
-		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
-		NFT_CONTRACT_ADDRESS_ON_GOERLI
+		CHAIN_ID,
+		CHAIN_NAME,
+		DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI,
+		NFT_CONTRACT_ADDRESS_ON_MUMBAI
 	} from '$lib/utils/constants';
 	import { arrayEquals, arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
+	import { ipfsJSONParser } from '$lib/utils/fileUtils';
 
 	//@ts-ignore
-	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, Dauction.abi);
+	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI, Dauction.abi);
 	//@ts-ignore
-	evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_GOERLI, NFTContract.abi);
+	evm.attachContract('nftContract', NFT_CONTRACT_ADDRESS_ON_MUMBAI, NFTContract.abi);
 
 	let auctionsOnDNFT: any[] = [];
 	let auctionsOnDNFT_: any[] = [];
@@ -60,10 +62,11 @@
 			return;
 		}
 		const nftJSONURL = await nftContract?.methods.tokenURI(tokenID).call();
+		console.log(ipfsJSONParser(nftJSONURL));
 		try {
-			const response = await fetch(nftJSONURL);
+			const response = await fetch(ipfsJSONParser(nftJSONURL));
 			const cResponse = await response.json();
-			return cResponse.image;
+			return ipfsJSONParser(cResponse.image);
 		} catch (error) {
 			console.log(error);
 			return '';
@@ -97,7 +100,7 @@
 	};
 
 	const getUserNFTs = async () => {
-		userNFTs = [];
+		userNFTs = await [];
 		try {
 			openModal(LoadingModal);
 			await getTotalMintedNFTs();
@@ -125,12 +128,12 @@
 	const populateAuctions = async () => {
 		auctionsOnDNFT_ = [];
 		auctionsOnDNFT = [];
-		// AVAILABLE_AUCTIONS.set([]);
+		await AVAILABLE_AUCTIONS.set([]);
 		try {
 			openModal(LoadingModal);
 			await getTotalMintedNFTs();
 			for (let i = 0; i < totalMinted; i++) {
-				let auction = await getAuctionDetails(NFT_CONTRACT_ADDRESS_ON_GOERLI, `${i}`);
+				let auction = await getAuctionDetails(NFT_CONTRACT_ADDRESS_ON_MUMBAI, `${i}`);
 				if (auction.owner !== '0x0000000000000000000000000000000000000000') {
 					auctionsOnDNFT_ = [...auctionsOnDNFT_, { tokenId: i, ...auction }];
 				}
@@ -141,11 +144,11 @@
 				let bidders = [];
 				let bidders_: any[] = [];
 				if (Number(auctionsOnDNFT_[i].auctionStatus) >= 2) {
-					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_GOERLI, auctionsOnDNFT_[i].tokenId);
+					bidders = await getBidders(NFT_CONTRACT_ADDRESS_ON_MUMBAI, auctionsOnDNFT_[i].tokenId);
 
 					for (let j = 0; j < bidders.length; j++) {
 						const x = await getBidDetail(
-							NFT_CONTRACT_ADDRESS_ON_GOERLI,
+							NFT_CONTRACT_ADDRESS_ON_MUMBAI,
 							auctionsOnDNFT_[j].tokenId,
 							bidders[0]
 						);
@@ -211,9 +214,9 @@
 	const checkNetwork = (network: any) => {
 		if (!network) return false;
 
-		if (network !== 5) {
+		if (network != CHAIN_ID) {
 			// goerli
-			alert('Please Choose Goerli chain');
+			alert(`Please Choose ${CHAIN_NAME} chain`);
 			disconnectWallet();
 			return false;
 		} else {

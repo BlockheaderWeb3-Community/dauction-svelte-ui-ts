@@ -11,12 +11,6 @@
 	} from 'svelte-web3';
 	import NumberInput from '$lib/components/reusables/NumberInput.svelte';
 	import TextInput from '$lib/components/reusables/TextInput.svelte';
-	import {
-		CURRENCIES,
-		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
-		DELAY_MINUTES,
-		NFT_CONTRACT_ADDRESS_ON_GOERLI
-	} from '$lib/utils/constants';
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
 

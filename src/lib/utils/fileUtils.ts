@@ -1,4 +1,9 @@
 const svgPath = (name: string) => {
 	return `/icons/${name}.svg`;
 };
-export { svgPath };
+
+const ipfsJSONParser = (ipfsURL: string) => {
+	return `https://ipfs.io/${ipfsURL.replaceAll('ipfs://', 'ipfs/')}`
+}
+
+export { svgPath, ipfsJSONParser };

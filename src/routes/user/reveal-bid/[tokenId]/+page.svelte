@@ -13,10 +13,8 @@
 	import TextInput from '$lib/components/reusables/TextInput.svelte';
 	import { ethers } from 'ethers';
 	import {
-		CURRENCIES,
-		DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI,
-		DELAY_MINUTES,
-		NFT_CONTRACT_ADDRESS_ON_GOERLI
+		CURRENCIES_ON_MUMBAI,
+		DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI,
 	} from '$lib/utils/constants';
 	import { combineDateTime, datetoUnix, minsToUnix } from '$lib/utils/timeUtils';
 	import { onMount } from 'svelte/internal';
@@ -74,7 +72,7 @@
 
 			const newPrice = ethers.BigNumber.from(toWei(bidPrice));
 			const setAll = await $contracts.mockToken.methods
-				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI, newPrice)
+				.approve(DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI, newPrice)
 				.send({ from: $selectedAccount });
 			console.log('set all_______', setAll);
 			approved = true;
@@ -100,7 +98,7 @@
 			await evm.attachContract('mockToken', currencyAddress, MockToken.abi);
 			console.log($contracts.mockToken.methods);
 			const getAll = await $contracts.mockToken.methods
-				.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI)
+				.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI)
 				.call();
 			console.log('get allo___', getAll);
 			if (getAll < newPrice) {
@@ -208,7 +206,7 @@
 				on:blur={() => getAllowanceStatus(formState.currencyAddress, formState.bidPrice)}
 			/>
 			<CurrencySelector
-				data={CURRENCIES}
+				data={CURRENCIES_ON_MUMBAI}
 				label="Choose Currency"
 				name="currencyAddress"
 				required={true}
