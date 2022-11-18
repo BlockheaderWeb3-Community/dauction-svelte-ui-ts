@@ -261,7 +261,7 @@
 
 <Header {disconnectWallet} />
 
-<main>
+<main style="overflow: hidden;">
 	<slot />
 </main>
 

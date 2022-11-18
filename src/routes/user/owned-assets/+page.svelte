@@ -67,13 +67,18 @@
 								liked={auction.liked}
 								tokenId={auction.tokenId}
 							/>
-							<!-- <div class="auction-card-bottom">
-								<div class="left">
+							<div class="auction-card-bottom">
+								<!-- <div class="left">
 									<span>Base Bid</span>
 									<h4>{auction.crypto_price.toLocaleString()}<span>MATIC</span></h4>
 									<span class="usd">${auction.usd_price.toLocaleString()}</span>
+								</div> -->
+								<div class="left">
+									<!-- <span>Token Id</span> -->
+									<h4>{`Token Id [${auction.tokenId}]`}<span>MATIC</span></h4>
+									<!-- <span class="usd">${auction.usd_price.toLocaleString()}</span> -->
 								</div>
-								<div class="right">
+								<!-- <div class="right">
 									<span style="color:var(--primary) !important">Your Winning Bid</span>
 									<h4>
 										{(
@@ -86,8 +91,8 @@
 											auction.usd_price + Math.floor(10 + Math.random() * 300000)
 										).toLocaleString()}
 									</p>
-								</div>
-							</div> -->
+								</div> -->
+							</div>
 							<div class="auction-btns">
 								<button class="btn-outline-primary auction-btn-explore">
 									<span>Put on Auction</span>
