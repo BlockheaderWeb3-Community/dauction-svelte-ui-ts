@@ -6,9 +6,11 @@
 	import UserHeader from '$lib/components/user/UserHeader.svelte';
 	import NeverMissSection from '$lib/components/never-miss-section/NeverMissSection.svelte';
 	import NotConnected from '$lib/components/not-connected/NotConnected.svelte';
-	import { currentAuction } from '$lib/stores/main';
+	import { currentAuction, NEW_AUCTION_CHANGES } from '$lib/stores/main';
 
-	onMount(() => {});
+	onMount(() => {
+		NEW_AUCTION_CHANGES.set(true);
+	});
 </script>
 
 {#if $connected && $selectedAccount !== null}
