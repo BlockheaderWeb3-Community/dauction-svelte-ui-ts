@@ -9,6 +9,7 @@
 	export let nft: string;
 	export let liked: boolean;
 	export let tokenId: number;
+	export let showLike = true;
 
 	const handleLikeAuction = (tokenId: number) => {
 		let newAuction = $AVAILABLE_AUCTIONS.find((x) => x.tokenId === tokenId);
@@ -33,20 +34,22 @@
 		<img src={profile_pic} alt="" />
 	</div>
 	<img src={nft} class="auction-card-image" alt="" />
-	{#if liked}
-		<img
-			src="/icons/full-heart.svg"
-			alt=""
-			class="liked"
-			on:click={() => handleLikeAuction(tokenId)}
-		/>
-	{:else}
-		<img
-			src="/icons/empty-heart.svg"
-			alt=""
-			class="liked"
-			on:click={() => handleLikeAuction(tokenId)}
-		/>
+	{#if showLike}
+		{#if liked}
+			<img
+				src="/icons/full-heart.svg"
+				alt=""
+				class="liked"
+				on:click={() => handleLikeAuction(tokenId)}
+			/>
+		{:else}
+			<img
+				src="/icons/empty-heart.svg"
+				alt=""
+				class="liked"
+				on:click={() => handleLikeAuction(tokenId)}
+			/>
+		{/if}
 	{/if}
 </div>
 

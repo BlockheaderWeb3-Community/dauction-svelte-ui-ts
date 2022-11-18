@@ -12,7 +12,10 @@
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
-		scrollIntoView(drawerContent, 400);
+		const _scroll = drawerContent.scrollTo;
+		window.scrollTo = function () {
+			_scroll.apply(drawerContent);
+		};
 	});
 
 	const handlePlaceBid = async (auction: any) => {

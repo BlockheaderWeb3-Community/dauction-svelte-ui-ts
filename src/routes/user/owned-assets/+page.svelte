@@ -9,7 +9,10 @@
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
-		scrollIntoView(drawerContent, 400);
+		const _scroll = drawerContent.scrollTo;
+		window.scrollTo = function () {
+			_scroll.apply(drawerContent);
+		};
 	});
 
 	const putOnAuction = async (nft: any) => {
@@ -74,6 +77,7 @@
 								profile_pic={randomProfilePic}
 								nft={nft.image}
 								liked={nft.liked}
+								showLike={false}
 								tokenId={nft.tokenId}
 							/>
 							<div class="auction-card-bottom">
