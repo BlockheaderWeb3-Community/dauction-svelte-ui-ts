@@ -1,20 +1,27 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
-	import type { AuctionDummy } from '$lib/interfaces';
-	import { USER_NFTS } from '$lib/stores/main';
-	import { RANDOM_PROFILE } from '$lib/utils/constants';
+	import type { Auction, AuctionDummy } from '$lib/interfaces';
+	import { USER_NFTS, nftToAuction } from '$lib/stores/main';
+	import { NFT_CONTRACT_ADDRESS_ON_GOERLI, RANDOM_PROFILE } from '$lib/utils/constants';
+	import { scrollIntoView } from '$lib/utils/otherUtils';
 	import { onMount } from 'svelte';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
-		const _scroll = drawerContent.scrollTo;
-		window.scrollTo = function () {
-			_scroll.apply(drawerContent);
-		};
+		scrollIntoView(drawerContent, 400);
 	});
 
-	const auction: AuctionDummy = {
+	const putOnAuction = async (nft: any) => {
+		await nftToAuction.set({
+			contractAddress: NFT_CONTRACT_ADDRESS_ON_GOERLI,
+			tokenId: nft.tokenId
+		});
+		goto('/user/create-auction');
+		return;
+	};
+
+	/*	const auction: AuctionDummy = {
 		id: Math.floor(1000 + Math.random() * 9000),
 		profile_name: 'Bored Ape Yacht Club',
 		profile_desc: 'BoredApeYachtClub #8867',
@@ -36,7 +43,9 @@
 	// 		usd_price: 122029,
 	// 		liked: false
 	// 	}
-	// ];
+	// ]; 
+
+	*/
 
 	const randomProfilePic = RANDOM_PROFILE[Math.floor(Math.random() * RANDOM_PROFILE.length)];
 </script>
@@ -55,7 +64,7 @@
 			</div>
 		</div>
 		<div class="auctions-container">
-			{#each $USER_NFTS as auction}
+			{#each $USER_NFTS as nft}
 				<div class="auction">
 					<div class="auction-card">
 						<div class="content">
@@ -63,9 +72,9 @@
 								profile_name={'auction.profile_name'}
 								profile_desc={'auction.profile_desc'}
 								profile_pic={randomProfilePic}
-								nft={auction.image}
-								liked={auction.liked}
-								tokenId={auction.tokenId}
+								nft={nft.image}
+								liked={nft.liked}
+								tokenId={nft.tokenId}
 							/>
 							<div class="auction-card-bottom">
 								<!-- <div class="left">
@@ -75,7 +84,7 @@
 								</div> -->
 								<div class="left">
 									<!-- <span>Token Id</span> -->
-									<h4>{`Token Id [${auction.tokenId}]`}<span>MATIC</span></h4>
+									<h4>{`Token Id [${nft.tokenId}]`}</h4>
 									<!-- <span class="usd">${auction.usd_price.toLocaleString()}</span> -->
 								</div>
 								<!-- <div class="right">
@@ -94,7 +103,10 @@
 								</div> -->
 							</div>
 							<div class="auction-btns">
-								<button class="btn-outline-primary auction-btn-explore">
+								<button
+									class="btn-outline-primary auction-btn-explore"
+									on:click={() => putOnAuction(nft)}
+								>
 									<span>Put on Auction</span>
 								</button>
 								<button class="btn-outline-primary auction-btn-explore" style="width: 38%;">
@@ -161,7 +173,8 @@
 	}
 	.owned-assets .auction-card .content .auction-card-bottom .left h4,
 	.owned-assets .auction-card .content .auction-card-bottom .right h4 {
-		font-size: 18.02px;
+		font-size: 15.02px;
+		font-weight: 700;
 	}
 	.owned-assets .auction-card .content .auction-btns {
 		align-items: normal;

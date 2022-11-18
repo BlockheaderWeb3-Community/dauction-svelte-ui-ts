@@ -8,13 +8,11 @@
 	import CountdownTimer from '$lib/components/reusables/CountdownTimer.svelte';
 	import { datetoUnix, unixToDate } from '$lib/utils/timeUtils';
 	import { goto } from '$app/navigation';
+	import { scrollIntoView } from '$lib/utils/otherUtils';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
-		const _scroll = drawerContent.scrollTo;
-		window.scrollTo = function () {
-			_scroll.apply(drawerContent);
-		};
+		scrollIntoView(drawerContent, 400);
 	});
 
 	const handlePlaceBid = async (auction: any) => {

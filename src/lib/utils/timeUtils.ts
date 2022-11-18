@@ -16,6 +16,7 @@ const minsToUnix = (mins: number) => {
 
 // UNIX -> Date
 const unixToDate = (unixDate: number) => {
+	console.log(unixDate);
 	const dateTime = new Date(unixDate * 1000);
 	return dateTime.toISOString();
 };

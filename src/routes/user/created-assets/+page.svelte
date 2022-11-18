@@ -1,14 +1,13 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
 	import CardTopTemplate from '$lib/components/user/CardTopTemplate.svelte';
 	import type { Auction, AuctionDummy } from '$lib/interfaces';
+	import { scrollIntoView } from '$lib/utils/otherUtils';
 	import { onMount } from 'svelte';
 
 	let drawerContent: HTMLDivElement;
 	onMount(() => {
-		const _scroll = drawerContent.scrollTo;
-		window.scrollTo = function () {
-			_scroll.apply(drawerContent);
-		};
+		scrollIntoView(drawerContent, 400);
 	});
 
 	const auction: AuctionDummy = {
@@ -95,7 +94,7 @@
 			<span>
 				Create a digital asset and archive it here. You can put it up for auction at any time
 			</span>
-			<button class="btn-primary short-button">
+			<button class="btn-primary short-button" on:click={() => goto('/explore')}>
 				<span>Explore Auctions</span>
 				<img src="/icons/arrow-forward-black.svg" alt="" />
 			</button>

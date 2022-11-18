@@ -29,7 +29,8 @@
 	import LoadingModal from '$lib/components/modals/LoadingModal.svelte';
 	import { fromWei, toWei } from '$lib/utils/conversionUtils';
 	import { goto } from '$app/navigation';
-	import { NEW_AUCTION_CHANGES } from '$lib/stores/main';
+	import { NEW_AUCTION_CHANGES, nftToAuction } from '$lib/stores/main';
+	import { scrollIntoView } from '$lib/utils/otherUtils';
 
 	let formState = {
 		nftContractAddress: '',
@@ -43,8 +44,18 @@
 	};
 
 	let approved = false;
+	let mainDiv: HTMLDivElement;
 
-	onMount(async () => {});
+	onMount(async () => {
+		if ($nftToAuction) {
+			console.log($nftToAuction);
+			formState.nftContractAddress = await $nftToAuction.contractAddress;
+			formState.tokenId = await $nftToAuction.tokenId;
+			nftToAuction.set(null);
+		}
+
+		scrollIntoView(mainDiv, 0);
+	});
 
 	const checkTokenId = async (tokenId: string) => {
 		approved = false;
@@ -170,7 +181,7 @@
 	};
 </script>
 
-<div class="create-auction">
+<div class="create-auction" bind:this={mainDiv}>
 	<h1 class="title">Create Auction</h1>
 
 	<form on:submit|preventDefault={onSubmit} novalidate class="mb-auto">

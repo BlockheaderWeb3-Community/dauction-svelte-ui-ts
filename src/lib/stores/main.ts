@@ -6,6 +6,8 @@ export const web3Modal = writable<any>(null);
 
 export const currentAuction = writable<Auction | null>(null);
 
+export const nftToAuction = writable<any>(null);
+
 export const NEW_AUCTION_CHANGES = writable<boolean>(false);
 
 // export const AVAILABLE_AUCTIONS = writable<Auction[]>([]);
@@ -19,9 +21,5 @@ AVAILABLE_AUCTIONS.subscribe(
 );
 
 const userNFTsJson: string = (browser && localStorage.getItem('USER_NFTS')) || '';
-export const USER_NFTS = writable<any[]>(
-	(userNFTsJson !== '' && JSON.parse(userNFTsJson)) || []
-);
-USER_NFTS.subscribe(
-	(value) => browser && (localStorage.USER_NFTS = JSON.stringify(value))
-);
+export const USER_NFTS = writable<any[]>((userNFTsJson !== '' && JSON.parse(userNFTsJson)) || []);
+USER_NFTS.subscribe((value) => browser && (localStorage.USER_NFTS = JSON.stringify(value)));
