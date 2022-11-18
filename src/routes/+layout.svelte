@@ -185,17 +185,17 @@
 		}
 	};
 
-	$: if ($connected && $selectedAccount !== null && checkNetwork($chainId)) {
+	$: if (
+		$connected &&
+		$selectedAccount !== null &&
+		checkNetwork($chainId) &&
+		$NEW_AUCTION_CHANGES
+	) {
 		populateAuctions();
 		getUserNFTs();
 	}
 
-	$: if ($NEW_AUCTION_CHANGES) {
-		populateAuctions();
-		getUserNFTs();
-	}
-
-	$: console.log($AVAILABLE_AUCTIONS.length);
+	// $: console.log($AVAILABLE_AUCTIONS.length);
 
 	// TODO: move to store
 

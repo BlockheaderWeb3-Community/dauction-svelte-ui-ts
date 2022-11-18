@@ -19,7 +19,7 @@
 						<span>{`${account?.slice(0, 11)}...${account?.slice(-4)}`}</span>
 						<img src="/icons/copy-icon.svg" alt="" class="copy" />
 					</div>
-					<span class="date">Joined: September 2022</span>
+					<span class="date">Joined: Novemeber 2022</span>
 				</div>
 			</div>
 			<div class="right">
