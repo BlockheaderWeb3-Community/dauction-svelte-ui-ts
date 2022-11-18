@@ -182,7 +182,7 @@
 		}
 	};
 
-	$: if ($connected && $selectedAccount !== null) {
+	$: if ($connected && $selectedAccount !== null && checkNetwork($chainId)) {
 		populateAuctions();
 		getUserNFTs();
 	}
@@ -208,13 +208,16 @@
 		browserSet('isWalletConnected', false);
 	};
 
-	const checkNetwork = async (network: any) => {
-		if (!network) return;
+	const checkNetwork = (network: any) => {
+		if (!network) return false;
 
 		if (network !== 5) {
 			// goerli
 			alert('Please Choose Goerli chain');
 			disconnectWallet();
+			return false;
+		} else {
+			return true;
 		}
 	};
 	$: if ($connected && $selectedAccount !== null) {
