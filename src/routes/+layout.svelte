@@ -135,6 +135,7 @@
 			for (let i = 0; i < totalMinted; i++) {
 				let auction = await getAuctionDetails(NFT_CONTRACT_ADDRESS_ON_MUMBAI, `${i}`);
 				if (auction.owner !== '0x0000000000000000000000000000000000000000') {
+					console.log(auction);
 					auctionsOnDNFT_ = [...auctionsOnDNFT_, { tokenId: i, ...auction }];
 				}
 			}
