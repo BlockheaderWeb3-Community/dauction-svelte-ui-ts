@@ -197,7 +197,7 @@
 						</div>
 					{:else}
 						<div class="title">
-							<h1>Noting to Display</h1>
+							<h1>No Auctions Yet</h1>
 						</div>
 					{/each}
 				</div>
