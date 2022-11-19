@@ -26,6 +26,7 @@
 	import { goto } from '$app/navigation';
 	import { createSalt, hashCommitmentParams, theRandomNumber } from '$lib/utils/hexUtils';
 	import InfoModal from '$lib/components/modals/InfoModal.svelte';
+	import { errorToast } from '$lib/components/toast/toastTheme';
 
 	let formState = {
 		nftContractAddress: '',
@@ -92,7 +93,7 @@
 		for (k in formState) {
 			const v = formState[k];
 			if (!v) {
-				alert(`${k} is required`);
+				errorToast(`${k} is required`);
 				return;
 			}
 		}

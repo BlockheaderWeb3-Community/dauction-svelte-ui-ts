@@ -3,10 +3,11 @@
 	import { connected, chainId, selectedAccount, defaultEvmStores } from 'svelte-web3';
 	import { web3Modal } from '$lib/stores/main';
 	import { browserSet } from '$lib/utils/requestUtils';
+	import { errorToast } from '../toast/toastTheme';
 
 	const connectWithWalletConnect = async () => {
 		if (typeof window.ethereum === 'undefined') {
-			alert('Please Install MetaMask');
+			errorToast('Please Install MetaMask');
 			return;
 		}
 		try {
@@ -14,7 +15,7 @@
 			defaultEvmStores.setProvider(provider);
 			browserSet('isWalletConnected', true);
 		} catch (error) {
-			alert('Could not Connect Wallet');
+			errorToast('Could not Connect Wallet');
 			console.log(error);
 		}
 	};

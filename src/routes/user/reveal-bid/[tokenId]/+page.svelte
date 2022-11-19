@@ -29,6 +29,7 @@
 	import InfoModal from '$lib/components/modals/InfoModal.svelte';
 	import TextAreaInput from '$lib/components/reusables/TextAreaInput.svelte';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
+	import { errorToast, successToast } from '$lib/components/toast/toastTheme';
 
 	let formState = {
 		nftContractAddress: '',
@@ -139,7 +140,7 @@
 			console.log('reveal Bid _______', revealBid);
 
 			closeModal();
-			alert('Bid Revealed, Awaiting Winner');
+			successToast('Bid Revealed, Awaiting Winner');
 			// openModal(InfoModal, {
 			// 	infoTitle: `Bid Reveal`,
 			// 	infoText: `Write down your salt -  ${salt}`
@@ -161,7 +162,7 @@
 		for (k in formState) {
 			const v = formState[k];
 			if (!v) {
-				alert(`${k} is required`);
+				errorToast(`${k} is required`);
 				return;
 			}
 		}

@@ -29,6 +29,7 @@
 	import { goto } from '$app/navigation';
 	import { NEW_AUCTION_CHANGES, nftToAuction } from '$lib/stores/main';
 	import { scrollIntoView } from '$lib/utils/otherUtils';
+	import { errorToast, successToast } from '$lib/components/toast/toastTheme';
 
 	let formState = {
 		nftContractAddress: '',
@@ -131,10 +132,9 @@
 				.createAuction(nftAddress, tokenId, minBidPrice, startTime, endTime, revealDuration)
 				.send({ from: $selectedAccount });
 			console.log('new Auction _______', newAuction);
-			// alert(`Take Note Of Your hashCommitment`);
-			closeModal();
-			alert(`Auction Created`);
-			NEW_AUCTION_CHANGES.set(true);
+			await closeModal();
+			await successToast(`Auction Created`);
+			await NEW_AUCTION_CHANGES.set(true);
 			goto('/explore');
 		} catch (error: any) {
 			console.log(error);
@@ -151,7 +151,7 @@
 		for (k in formState) {
 			const v = formState[k];
 			if (!v) {
-				alert(`${k} is required`);
+				errorToast(`${k} is required`);
 				return;
 			}
 		}

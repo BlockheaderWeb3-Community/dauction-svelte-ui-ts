@@ -40,6 +40,7 @@
 	} from '$lib/utils/constants';
 	import { arrayEquals, arrayIsNotEqual, sortArrayofObjects } from '$lib/utils/otherUtils';
 	import { ipfsJSONParser } from '$lib/utils/fileUtils';
+	import { errorToast } from '$lib/components/toast/toastTheme';
 
 	//@ts-ignore
 	evm.attachContract('dauctionContract', DAUCTION_MARKETPLACE_ADDRESS_ON_MUMBAI, Dauction.abi);
@@ -217,7 +218,7 @@
 
 		if (network != CHAIN_ID) {
 			// goerli
-			alert(`Please Choose ${CHAIN_NAME} chain`);
+			errorToast(`Please Choose ${CHAIN_NAME} chain`);
 			disconnectWallet();
 			return false;
 		} else {
@@ -232,7 +233,8 @@
 	$: checkNetwork($chainId);
 	onMount(() => {
 		if (typeof window.ethereum === 'undefined') {
-			alert('Please Install MetaMask');
+			errorToast('Please Install MetaMask');
+
 			return;
 		}
 

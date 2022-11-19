@@ -24,36 +24,11 @@
 	import InfoModal from '$lib/components/modals/InfoModal.svelte';
 	import TextAreaInput from '$lib/components/reusables/TextAreaInput.svelte';
 	import CurrencySelector from '$lib/components/reusables/CurrencySelector.svelte';
-	import { successToast } from '$lib/components/toast/toastTheme';
+	import { errorToast, successToast } from '$lib/components/toast/toastTheme';
 
 	let formState = {
 		nftContractAddress: '',
 		tokenId: `${data.tokenId}`
-	};
-
-	const getAllowanceStatus = async (address: string) => {
-		// try {
-		// 	//@ts-ignore
-		// 	await evm.attachContract('mockToken', address, MockToken.abi);
-		// 	const getAll = await $contracts.mockToken.methods.allowance($selectedAccount, DAUCTION_MARKETPLACE_ADDRESS_ON_GOERLI).call();
-		// 	console.log('get allo___', getAll);
-		// 	if (getAll == 0) {
-		// 		approved = true;
-		// 		closeModal();
-		// 		return;
-		// 	} else {
-		// 		approved = false;
-		// 		closeModal();
-		// 		return;
-		// 	}
-		// 	// alert('Please Approve Dauction Contract');
-		// } catch (error: any) {
-		// 	approved = false;
-		// 	const msg = error.message;
-		// 	alert(msg.split('{')[0]);
-		// 	closeModal();
-		// 	return;
-		// }
 	};
 
 	onMount(async () => {
@@ -65,7 +40,7 @@
 			$selectedAccount &&
 			$currentAuction?.owner.toLowerCase() !== $selectedAccount?.toLowerCase()
 		) {
-			alert('You are not the owner of auction');
+			errorToast('You are not the owner of auction');
 			goto('/explore');
 		}
 	});
@@ -105,7 +80,7 @@
 		for (k in formState) {
 			const v = formState[k];
 			if (!v) {
-				alert(`${k} is required`);
+				errorToast(`${k} is required`);
 				return;
 			}
 		}
