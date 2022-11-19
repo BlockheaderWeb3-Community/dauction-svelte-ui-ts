@@ -107,7 +107,7 @@
 											{#if datetoUnix(new Date()) < auction.startTime}
 												<span>Time before bid starts</span>
 												<h4>
-													<CountdownTimer endTime={unixToDate(auction?.startDate)} />
+													<CountdownTimer endTime={unixToDate(auction.startTime)} />
 												</h4>
 											{:else if $selectedAccount && auction.bidders
 													.join('')
