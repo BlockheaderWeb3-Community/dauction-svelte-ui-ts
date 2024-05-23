@@ -1,4 +1,5 @@
-import { invalid } from '@sveltejs/kit';
+// import { invalid } from '@sveltejs/kit';
+/** @type {import { invalid } from "@sveltejs/kit";}*/
 import { words, allowed } from './words.server';
 import type { PageServerLoad, Actions } from './$types';
 
